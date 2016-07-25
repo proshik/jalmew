@@ -1,0 +1,31 @@
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 20000
+
+ribbon:
+  ReadTimeout: 20000
+  ConnectTimeout: 20000
+
+zuul:
+  host:
+    connect-timeout-millis: 20000
+    socket-timeout-millis: 20000
+
+  routes:
+    auth-service:
+      path: /uaa/**
+      url: http://localhost:5000
+      stripPrefix: false
+
+    wordbook-service:
+      path: /wordbook/**
+      clientId: wordbook-service
+      stripPrefix: false
+
+server:
+  port: 4000
+

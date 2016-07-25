@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+security:
+  oauth2:
+    resource:
+      user-info-uri: http://localhost:5000/uaa/users/current
+    client:
+      clientId: wordbook-service
+      clientSecret: password
+      accessTokenUri: http://localhost:5000/uaa/oauth/token
+      grant-type: client_credentials
+      scope: server
+
