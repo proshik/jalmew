@@ -5,24 +5,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.proshik.jalmew.auth.model.User;
 import ru.proshik.jalmew.auth.repository.UserRepository;
 
 @Service
-public class MongoUserDetailsService implements UserDetailsService {
+public class PersistenceUserDetailsService implements UserDetailsService {
 
-	@Autowired
-	private UserRepository repository;
+    @Autowired
+    private UserRepository repository;
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		User user = repository.findOne(username);
+        UserDetails user = repository.findByUsername(username);
 
-		if (user == null) {
-			throw new UsernameNotFoundException(username);
-		}
+        if (user == null) {
+            throw new UsernameNotFoundException(username);
+        }
 
-		return user;
-	}
+        return user;
+    }
 }

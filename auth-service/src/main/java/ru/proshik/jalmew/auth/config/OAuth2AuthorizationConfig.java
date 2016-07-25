@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
-import ru.proshik.jalmew.auth.service.security.MongoUserDetailsService;
+import ru.proshik.jalmew.auth.service.security.PersistenceUserDetailsService;
 
 /**
  * Created by proshik on 24.07.16.
@@ -26,7 +26,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private MongoUserDetailsService userDetailsService;
+    private PersistenceUserDetailsService userDetailsService;
 
     @Autowired
     private Environment env;

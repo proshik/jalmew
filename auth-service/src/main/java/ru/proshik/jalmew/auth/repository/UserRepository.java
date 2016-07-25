@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import ru.proshik.jalmew.auth.model.User;
 
 @Repository
-public interface UserRepository extends CrudRepository<User, String> {
+public interface UserRepository extends CrudRepository<User, Long> {
+
+    User findByUsername(String username);
 
 }
