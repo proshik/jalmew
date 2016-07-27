@@ -1,3 +1,6 @@
+server:
+  port: 4000
+
 hystrix:
   command:
     default:
@@ -26,6 +29,8 @@ zuul:
       clientId: wordbook-service
       stripPrefix: false
 
-server:
-  port: 4000
+    word-service:
+      path: /word/**
+      clientId: word-service
+      stripPrefix: false
 

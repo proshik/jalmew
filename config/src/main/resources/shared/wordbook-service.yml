@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9010
 
 logging:
   level:
@@ -16,3 +16,22 @@ security:
       grant-type: client_credentials
       scope: server
 
+spring:
+  jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+  database:
+    driverClassName: org.postgresql.Driver
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jalmew_wordbook
+    username: postgres
+    password: password
+    initial-size: 5
+    max-active: 100
+    max-idle: 5
+    test-on-borrow: true
+    test-while-idle: true
+    test-on-return: true
+    min-idle: 2
+    validation-query: select 1

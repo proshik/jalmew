@@ -41,6 +41,11 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
                 .withClient("wordbook-service")
                 .secret("password")
                 .authorizedGrantTypes("client_credentials", "refresh_token")
+                .scopes("server")
+                .and()
+                .withClient("word-service")
+                .secret("password")
+                .authorizedGrantTypes("client_credentials", "refresh_token")
                 .scopes("server");
     }
 

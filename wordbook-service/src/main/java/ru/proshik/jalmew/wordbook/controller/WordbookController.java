@@ -2,6 +2,8 @@ package ru.proshik.jalmew.wordbook.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -10,6 +12,7 @@ import ru.proshik.jalmew.wordbook.client.AuthServiceClient;
 import ru.proshik.jalmew.wordbook.controller.dto.UserDto;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 /**
  * Created by proshik on 24.07.16.
@@ -22,13 +25,8 @@ public class WordbookController {
     private AuthServiceClient authClient;
 
     @RequestMapping(value = "/available")
-    public String available() {
-        return "Spring in Action";
-    }
-
-    @RequestMapping(value = "/checked-out")
-    public String checkedOut() {
-        return "Spring Boot in Action";
+    public String available(Principal principal) {
+        return "Available wordbook-service for user: " + principal.getName();
     }
 
     @RequestMapping(method = RequestMethod.POST)
