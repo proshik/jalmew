@@ -20,7 +20,9 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
     @GenericGenerator(name = "users_seq", strategy = "enhanced-sequence",
             parameters = {
-                    @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "users_seq"),
+                    @org.hibernate.annotations.Parameter(
+                            name = SequenceStyleGenerator.SEQUENCE_PARAM,
+                            value = "users_seq"),
                     @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.INCREMENT_PARAM, value = "1")})
     private Long id;
 

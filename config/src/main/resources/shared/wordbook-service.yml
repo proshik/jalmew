@@ -5,6 +5,9 @@ logging:
   level:
     org.springframework.security: DEBUG
 
+liquibase:
+  change-log: classpath:db-changelog.xml
+
 security:
   oauth2:
     resource:
