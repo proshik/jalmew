@@ -34,3 +34,8 @@ zuul:
       clientId: word-service
       stripPrefix: false
 
+    y_translate-service:
+      path: /yTranslate/**
+      clientId: y_translate-service
+      stripPrefix: false
+

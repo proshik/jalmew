@@ -16,6 +16,7 @@
         <module>registry</module>
         <module>gateway</module>
         <module>word-service</module>
+        <module>y_translate-service</module>
     </modules>
 
 

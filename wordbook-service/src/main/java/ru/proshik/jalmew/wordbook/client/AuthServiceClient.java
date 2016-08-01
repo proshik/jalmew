@@ -2,10 +2,12 @@ package ru.proshik.jalmew.wordbook.client;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.proshik.jalmew.wordbook.controller.dto.UserDto;
 
+@Component
 @FeignClient(name = "auth-service")
 public interface AuthServiceClient {
 

@@ -12,5 +12,6 @@ eureka:
   instance:
     prefer-ip-address: true
   client:
+    registry-fetch-interval-seconds: 10
     registerWithEureka: false
     fetchRegistry: false
