@@ -40,7 +40,7 @@ public class YTranslateController {
             throw new NullPointerException("params key or lang for y.dict is not set");
     }
 
-    @RequestMapping(value = "translate", method = RequestMethod.GET, params = {"word"})
+    @RequestMapping(value = "translate", method = RequestMethod.GET)
     public ResponseEntity translate(@RequestParam("word") @NotEmpty String word) {
 
         if (validate(word)) {

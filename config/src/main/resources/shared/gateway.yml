@@ -21,7 +21,8 @@ zuul:
   routes:
     auth-service:
       path: /uaa/**
-      url: http://localhost:5000
+      clientId: auth-service
+#      url: http://localhost:5000
       stripPrefix: false
 
     wordbook-service:
@@ -34,8 +35,8 @@ zuul:
       clientId: word-service
       stripPrefix: false
 
-    y_translate-service:
+    ytranslate-service:
       path: /yTranslate/**
-      clientId: y_translate-service
+      clientId: ytranslate-service
       stripPrefix: false
 
