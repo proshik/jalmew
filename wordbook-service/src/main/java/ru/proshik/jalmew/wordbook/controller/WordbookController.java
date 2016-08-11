@@ -43,7 +43,7 @@ public class WordbookController {
     }
 
     @Transactional
-    @RequestMapping(method = RequestMethod.POST, value = "word/{wordId:\\d+}")
+    @RequestMapping(method = RequestMethod.POST, value = "word/{wordId}")
     public ResponseEntity add(Principal principal, @PathVariable("wordId") String wordId) {
 
         Wordbook wordFromWordbook = wordbookRepository.findByUsernameAndWordId(principal.getName(), wordId);
@@ -58,10 +58,11 @@ public class WordbookController {
         }
 
         wordbookRepository.save(new Wordbook(principal.getName(), wordId));
+
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "word/{wordId:\\d+}")
+    @RequestMapping(method = RequestMethod.GET, value = "word/{wordId}")
     public ResponseEntity get(Principal principal, @PathVariable("wordId") String wordId) {
 
         Wordbook userFromWordBook = wordbookRepository.findByUsernameAndWordId(principal.getName(), wordId);
@@ -80,15 +81,12 @@ public class WordbookController {
         if (wordIdsByByUser.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(wordClient.getByIds(new HashSet<>(wordIdsByByUser)));
 
-//        return ResponseEntity.ok(wordClient.getByIds(wordIdsByByUser.stream()
-//                .map(Wordbook::getWordId)
-//                .collect(Collectors.toSet())));
+        return ResponseEntity.ok(wordClient.getByIds(new HashSet<>(wordIdsByByUser)));
     }
 
     @Transactional
-    @RequestMapping(method = RequestMethod.DELETE, value = "word/{wordId:\\d+}")
+    @RequestMapping(method = RequestMethod.DELETE, value = "word/{wordId}")
     public ResponseEntity delete(Principal principal, @PathVariable("wordId") String wordId) {
 
         Wordbook wordFromWordbook = wordbookRepository.findByUsernameAndWordId(principal.getName(), wordId);

@@ -10,6 +10,7 @@ import ru.proshik.jalmew.word.client.y_translate_dto.YTranslateWord;
 /**
  * Created by proshik on 09.08.16.
  */
+@Component
 @FeignClient(name = "ytranslate-service")
 public interface YTranslateServiceClient {
 

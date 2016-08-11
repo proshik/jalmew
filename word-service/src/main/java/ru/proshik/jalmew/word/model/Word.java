@@ -18,17 +18,11 @@ public class Word {
 
     private String text;
 
-    private String partOfSpeech;
-
-    private String trs;
-
     private List<Translated> translated = new ArrayList<>();
 
     @PersistenceConstructor
-    public Word(String text, String partOfSpeech, String trs, List<Translated> translated) {
+    public Word(String text, List<Translated> translated) {
         this.text = text;
-        this.partOfSpeech = partOfSpeech;
-        this.trs = trs;
         this.translated = translated;
     }
 
@@ -38,14 +32,6 @@ public class Word {
 
     public String getText() {
         return text;
-    }
-
-    public String getPartOfSpeech() {
-        return partOfSpeech;
-    }
-
-    public String getTrs() {
-        return trs;
     }
 
     public List<Translated> getTranslated() {

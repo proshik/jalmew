@@ -1,5 +1,7 @@
 package ru.proshik.jalmew.y_translate.model;
 
+import java.util.List;
+
 /**
  * Created by proshik on 22.05.16.
  */
@@ -7,7 +9,7 @@ public class YTranslateWord {
 
     private Head head;
 
-    private Definition[] def;
+    private List<Definition> def;
 
     public YTranslateWord() {
     }
@@ -16,7 +18,7 @@ public class YTranslateWord {
         return head;
     }
 
-    public Definition[] getDef() {
+    public List<Definition> getDef() {
         return def;
     }
 }

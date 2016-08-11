@@ -1,5 +1,7 @@
 package ru.proshik.jalmew.y_translate.model;
 
+import java.util.List;
+
 /**
  * Created by proshik on 22.05.16.
  */
@@ -7,7 +9,7 @@ public class Example {
 
     private String text;
 
-    private ExampleTransfer[] tr;
+    private List<ExampleTransfer> tr;
 
     public Example() {
     }
@@ -16,7 +18,7 @@ public class Example {
         return text;
     }
 
-    public ExampleTransfer[] getTr() {
+    public List<ExampleTransfer> getTr() {
         return tr;
     }
 }

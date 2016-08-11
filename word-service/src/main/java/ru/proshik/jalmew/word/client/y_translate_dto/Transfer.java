@@ -1,5 +1,7 @@
 package ru.proshik.jalmew.word.client.y_translate_dto;
 
+import java.util.List;
+
 /**
  * Created by proshik on 22.05.16.
  */
@@ -11,11 +13,11 @@ public class Transfer {
 
     private String gen;
 
-    private Synonyms[] syn;
+    private List<Synonyms> syn;
 
-    private Meaning[] mean;
+    private List<Meaning> mean;
 
-    private Example[] ex;
+    private List<Example> ex;
 
     public Transfer() {
     }
@@ -32,15 +34,15 @@ public class Transfer {
         return gen;
     }
 
-    public Synonyms[] getSyn() {
+    public List<Synonyms> getSyn() {
         return syn;
     }
 
-    public Meaning[] getMean() {
+    public List<Meaning> getMean() {
         return mean;
     }
 
-    public Example[] getEx() {
+    public List<Example> getEx() {
         return ex;
     }
 }
