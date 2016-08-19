@@ -3,6 +3,7 @@ package ru.proshik.jalmew.word.controller;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.proshik.jalmew.word.client.YTranslateServiceClient;
 import ru.proshik.jalmew.word.client.y_translate_dto.YTranslateWord;
@@ -13,6 +14,7 @@ import ru.proshik.jalmew.word.model.Word;
 import ru.proshik.jalmew.word.repository.WordRepository;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,8 @@ public class WordController {
         return "Available word-service for user: " + principal.getName();
     }
 
+    // TODO: 19.08.16 только внутренний
+    @Transactional
     @RequestMapping(method = RequestMethod.POST, value = "words/{word}")
     public ResponseEntity add(@PathVariable("word") String word) {
 
@@ -41,28 +45,41 @@ public class WordController {
             return ResponseEntity.badRequest().build();
         }
 
-        YTranslateWord translate = yTranslateServiceClient.translate(word);
+        Word foundWord = wordRepository.searchByText(word);
 
-        if (translate.getDef().isEmpty()) {
-            return ResponseEntity.notFound().build();
+        if (foundWord == null) {
+            YTranslateWord translate = yTranslateServiceClient.translate(word);
+            if (translate.getDef().isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Word savedWord = wordRepository.save(toSave(translate, word));
+
+            return ResponseEntity.ok(toOutShort(savedWord));
+        } else {
+
+            YTranslateWord translate = yTranslateServiceClient.translate(word);
+            if (translate.getDef().isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Word save = wordRepository.save(toSave(translate, word));
+
+            return ResponseEntity.ok(toOutShort(save));
         }
-
-        Word save = wordRepository.save(toSave(translate, word));
-
-        return ResponseEntity.ok(save);
     }
 
-    @RequestMapping(value = "words/search", params = {"wordId=null"})
-    public ResponseEntity searchByWord(@RequestParam("word") String word,
-                                       @RequestParam("wordId") List<String> wordId) {
+    @Transactional
+    @RequestMapping(method = RequestMethod.GET, value = "words/search")
+    public ResponseEntity search(@RequestParam("word") String word) {
 
         if (word == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        List<Word> words = wordRepository.searchByText(word);
+        Word foundWord = wordRepository.searchByText(word);
 
-        if (words.isEmpty()) {
+        if (foundWord == null) {
             YTranslateWord translate = yTranslateServiceClient.translate(word);
             if (translate.getDef().isEmpty()) {
                 return ResponseEntity.notFound().build();
@@ -73,7 +90,7 @@ public class WordController {
             return ResponseEntity.ok(toOutShort(savedWord));
         }
 
-        return ResponseEntity.ok(toOutShort(words));
+        return ResponseEntity.ok(toOutShort(foundWord));
     }
 
     @RequestMapping(value = "words/{wordId}")
@@ -95,7 +112,7 @@ public class WordController {
     @RequestMapping(value = "words")
     public ResponseEntity getByIds(@RequestParam("wordId") List<String> wordIds) {
 
-        List<Word> words = wordRepository.findAll(wordIds);
+        List<Word> words = wordRepository.findByIdIn(wordIds);
 
         if (words.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -113,11 +130,17 @@ public class WordController {
                         v.getLeft(),
                         v.getMiddle(),
                         v.getRight().getText(),
-                        v.getRight().getPos(),
-                        v.getRight().getGen(),
-                        v.getRight().getEx().stream()
+                        v.getRight().getPos() != null
+                                ? v.getRight().getPos()
+                                : null,
+                        v.getRight().getGen() != null
+                                ? v.getRight().getGen()
+                                : null,
+                        v.getRight().getEx() != null
+                                ? v.getRight().getEx().stream()
                                 .map(ex -> new Example(ex.getText(), ex.getText()))
-                                .collect(Collectors.toList())))
+                                .collect(Collectors.toList())
+                                : Collections.emptyList()))
                 .collect(Collectors.toList()));
 
         /**
