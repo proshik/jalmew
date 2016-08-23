@@ -9,14 +9,15 @@ import ru.proshik.jalmew.wordbook.client.AuthServiceClient;
 import ru.proshik.jalmew.wordbook.client.WordServiceClient;
 import ru.proshik.jalmew.wordbook.client.dto.WordOutShort;
 import ru.proshik.jalmew.wordbook.controller.dto.UserDto;
-import ru.proshik.jalmew.wordbook.controller.dto.WordDto;
+import ru.proshik.jalmew.wordbook.controller.dto.WordAddIn;
+import ru.proshik.jalmew.wordbook.controller.dto.WordListOut;
 import ru.proshik.jalmew.wordbook.model.Wordbook;
 import ru.proshik.jalmew.wordbook.repository.WordbookRepository;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by proshik on 24.07.16.
@@ -46,7 +47,7 @@ public class WordbookController {
 
     @Transactional
     @RequestMapping(method = RequestMethod.POST, value = "word")
-    public ResponseEntity add(Principal principal, @RequestBody WordDto word) {
+    public ResponseEntity add(Principal principal, @RequestBody WordAddIn word) {
 
         if (word == null || word.getWord() == null) {
             return ResponseEntity.badRequest().build();
@@ -108,13 +109,19 @@ public class WordbookController {
     @RequestMapping(method = RequestMethod.GET, value = "word")
     public ResponseEntity list(Principal principal) {
 
-        List<String> wordIdsByByUser = wordbookRepository.findWordIdByUsername(principal.getName());
+        List<Wordbook> wordIdsByByUser = wordbookRepository.findWordbooksByUsername(principal.getName());
 
         if (wordIdsByByUser.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(wordClient.getByIds(new HashSet<>(wordIdsByByUser)));
+//        wordClient.getByIds(new HashSet<>(wordIdsByByUser.stream()
+//                .map(Wordbook::getWordId)
+//                .collect(Collectors.toList())));
+
+        return ResponseEntity.ok(wordIdsByByUser.stream()
+                .map(wb -> new WordListOut(wb.getWordId(), wb.getStatistic().getProgressLevel().getValue()))
+                .collect(Collectors.toList()));
     }
 
     @Transactional

@@ -2,11 +2,12 @@ package ru.proshik.jalmew.word.controller;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.proshik.jalmew.word.client.YTranslateServiceClient;
-import ru.proshik.jalmew.word.client.y_translate_dto.YTranslateWord;
+import ru.proshik.jalmew.word.client.ytranslate_dto.YTranslateWord;
 import ru.proshik.jalmew.word.controller.dto.WordOutShort;
 import ru.proshik.jalmew.word.model.Example;
 import ru.proshik.jalmew.word.model.Translated;

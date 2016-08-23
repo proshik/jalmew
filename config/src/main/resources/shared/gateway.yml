@@ -40,3 +40,8 @@ zuul:
       clientId: ytranslate-service
       stripPrefix: false
 
+    learn-service:
+      path: /learn/**
+      clientId: learn-service
+      stripPrefix: false
+

@@ -5,8 +5,19 @@ package ru.proshik.jalmew.wordbook.model.enums;
  */
 public enum ProgressLevel {
 
-    P0,
-    P_25,
-    P_50,
-    P_100;
+    P0(0),
+    P_25(25),
+    P_50(50),
+    P_100(100);
+
+    private int value;
+
+    ProgressLevel(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
 }

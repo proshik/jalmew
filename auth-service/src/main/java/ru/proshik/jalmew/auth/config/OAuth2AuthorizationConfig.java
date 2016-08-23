@@ -46,6 +46,16 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
                 .withClient("word-service")
                 .secret("password")
                 .authorizedGrantTypes("client_credentials", "refresh_token")
+                .scopes("server")
+                .and()
+                .withClient("learn-service")
+                .secret("password")
+                .authorizedGrantTypes("client_credentials", "refresh_token")
+                .scopes("server")
+                .and()
+                .withClient("ytranslate-service")
+                .secret("password")
+                .authorizedGrantTypes("client_credentials", "refresh_token")
                 .scopes("server");
     }
 
