@@ -2,6 +2,7 @@ package ru.proshik.jalmew.wordbook.model;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
+import org.springframework.security.access.method.P;
 import ru.proshik.jalmew.wordbook.model.enums.ProgressLevel;
 
 import javax.persistence.*;
@@ -32,6 +33,28 @@ public class WordbookStatistic {
 
     public WordbookStatistic() {
     }
+
+    public void incrementValue() {
+        switch (getProgressLevel()) {
+            case P0:
+                setProgressLevel(ProgressLevel.P_25);
+                break;
+            case P_25:
+                setProgressLevel(ProgressLevel.P_50);
+                break;
+            case P_50:
+                setProgressLevel(ProgressLevel.P_75);
+                break;
+            case P_75:
+                setProgressLevel(ProgressLevel.P_100);
+                break;
+            case P_100:
+                break;
+            default:
+                break;
+        }
+    }
+
 
     public Long getId() {
         return id;

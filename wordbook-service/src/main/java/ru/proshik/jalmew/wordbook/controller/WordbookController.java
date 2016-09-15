@@ -3,11 +3,13 @@ package ru.proshik.jalmew.wordbook.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.proshik.jalmew.wordbook.client.AuthServiceClient;
 import ru.proshik.jalmew.wordbook.client.WordServiceClient;
 import ru.proshik.jalmew.wordbook.client.dto.WordOutShort;
+import ru.proshik.jalmew.wordbook.controller.dto.AnswerTranslateWord;
 import ru.proshik.jalmew.wordbook.controller.dto.UserDto;
 import ru.proshik.jalmew.wordbook.controller.dto.WordAddIn;
 import ru.proshik.jalmew.wordbook.controller.dto.WordListOut;
@@ -17,6 +19,8 @@ import ru.proshik.jalmew.wordbook.repository.WordbookRepository;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -106,6 +110,7 @@ public class WordbookController {
         return ResponseEntity.ok(wordClient.getById(wordId));
     }
 
+    @PreAuthorize("#oauth2.hasScope('ui')")
     @RequestMapping(method = RequestMethod.GET, value = "word")
     public ResponseEntity list(Principal principal) {
 
@@ -115,10 +120,7 @@ public class WordbookController {
             return ResponseEntity.noContent().build();
         }
 
-//        wordClient.getByIds(new HashSet<>(wordIdsByByUser.stream()
-//                .map(Wordbook::getWordId)
-//                .collect(Collectors.toList())));
-
+        // TODO: 15.09.16 надо еще ходить в word-service за переводом слов
         return ResponseEntity.ok(wordIdsByByUser.stream()
                 .map(wb -> new WordListOut(wb.getWordId(), wb.getStatistic().getProgressLevel().getValue()))
                 .collect(Collectors.toList()));
@@ -137,6 +139,45 @@ public class WordbookController {
         wordbookRepository.delete(wordFromWordbook);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("#oauth2.hasScope('server')")
+    @RequestMapping(method = RequestMethod.GET, value = "word/learn/{userName}")
+    public ResponseEntity listForLearn(@PathVariable("userName") String userName) {
+        List<Wordbook> wordIdsByByUser = wordbookRepository.findWordbooksByUsername(userName);
+
+        if (wordIdsByByUser.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(wordIdsByByUser.stream()
+                .map(wb -> new WordListOut(wb.getWordId(), wb.getStatistic().getProgressLevel().getValue()))
+                .collect(Collectors.toList()));
+    }
+
+    @Transactional
+    @RequestMapping(method = RequestMethod.POST, value = "word/learn/{userName}")
+    public ResponseEntity saveStatistic(@PathVariable("userName") String userName,
+                                        @RequestBody List<AnswerTranslateWord> result) {
+
+        List<Wordbook> wordbooks = wordbookRepository.findByUsernameAndWordIdIn(userName, getWordIds(result));
+
+        Map<String, Boolean> resultByWordId = result.stream()
+                .collect(Collectors.toMap(AnswerTranslateWord::getWordId, AnswerTranslateWord::isResult));
+
+        wordbooks.stream()
+                .filter(wordbook -> resultByWordId.get(wordbook.getWordId()))
+                .forEach(wordbook -> wordbook.getStatistic().incrementValue());
+
+        wordbookRepository.save(wordbooks);
+
+        return ResponseEntity.ok().build();
+    }
+
+    private List<String> getWordIds(List<AnswerTranslateWord> result) {
+        return result.stream()
+                .map(AnswerTranslateWord::getWordId)
+                .collect(Collectors.toList());
     }
 
 }

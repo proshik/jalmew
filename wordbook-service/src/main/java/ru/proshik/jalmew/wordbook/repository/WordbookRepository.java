@@ -16,6 +16,8 @@ public interface WordbookRepository extends JpaRepository<Wordbook, Long> {
 
     Wordbook findByUsernameAndWordId(String username, String wordId);
 
+    List<Wordbook> findByUsernameAndWordIdIn(String username, List<String> wordIds);
+
     @Query("select w.wordId from Wordbook w where w.username = :username")
     List<String> findWordIdByUsername(@Param("username") String username);
 

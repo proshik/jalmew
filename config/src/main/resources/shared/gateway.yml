@@ -22,7 +22,6 @@ zuul:
     auth-service:
       path: /uaa/**
       clientId: auth-service
-#      url: http://localhost:5000
       stripPrefix: false
 
     wordbook-service:

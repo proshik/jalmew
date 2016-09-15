@@ -8,6 +8,9 @@ public class WordListOut {
     public String wordId;
     public int progressPercent;
 
+    public WordListOut() {
+    }
+
     public WordListOut(String wordId, int progressPercent) {
         this.wordId = wordId;
         this.progressPercent = progressPercent;

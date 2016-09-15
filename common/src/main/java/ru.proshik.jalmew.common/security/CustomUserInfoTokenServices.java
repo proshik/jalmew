@@ -1,4 +1,4 @@
-package ru.proshik.jalmew.ytranslate.config;
+package ru.proshik.jalmew.common.security;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

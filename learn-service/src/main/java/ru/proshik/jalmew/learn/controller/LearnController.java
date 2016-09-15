@@ -2,7 +2,10 @@ package ru.proshik.jalmew.learn.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,9 +13,11 @@ import ru.proshik.jalmew.learn.client.WordClient;
 import ru.proshik.jalmew.learn.client.WordbookClient;
 import ru.proshik.jalmew.learn.client.dto.WordListOut;
 import ru.proshik.jalmew.learn.client.dto.WordOutShort;
+import ru.proshik.jalmew.learn.controller.dto.AnswerTranslateWord;
 import ru.proshik.jalmew.learn.controller.dto.LearnTranslateWord;
 import ru.proshik.jalmew.learn.controller.dto.LearnWord;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +38,9 @@ public class LearnController {
     private WordClient wordClient;
 
     @RequestMapping(method = RequestMethod.GET, value = "training/words")
-    public ResponseEntity wordTranslate() {
+    public ResponseEntity trainingWordTranslate(Principal principal) {
 
-        List<WordListOut> wordsOfUser = wordbookClient.list();
+        List<WordListOut> wordsOfUser = wordbookClient.listForLearn(principal.getName());
 
         if (wordsOfUser == null || wordsOfUser.isEmpty() || wordsOfUser.size() < 10) {
             return ResponseEntity.noContent().build();
@@ -61,21 +66,6 @@ public class LearnController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-//        Set<String> saltWordsFromUserWords = wordsOfUser.stream()
-//                .filter(wou ->
-//                        wou.getProgressPercent() < 100 && !userWordsForLearn.stream()
-//                                .map(WordListOut::getWordId).collect(Collectors.toList()).contains(wou.getWordId()))
-//                .map(WordListOut::getWordId)
-//                .collect(Collectors.toSet());
-//
-//        List<WordOutShort> saltWords = new ArrayList<>();
-//
-//        if (saltWordsFromUserWords.size() >= wordsOfUser.size() * 5){
-//            saltWords = wordClient.getByIds(saltWordsFromUserWords);
-//        } else {
-//            saltWords = wordClient.getRandomWords(wordsOfUser.size() * 5);
-//        }
-
         List<LearnWord> learnWords = wordDetailsForLearn.stream()
                 .map(w -> new LearnWord(
                         w.getId(),
@@ -87,6 +77,15 @@ public class LearnController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new LearnTranslateWord(learnWords));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "training/words/answer")
+    public ResponseEntity trainingWordAnswer(@AuthenticationPrincipal Principal principal,
+                                             @RequestBody List<AnswerTranslateWord> result) {
+
+        wordbookClient.saveStatistic(principal.getName(), result);
+
+        return ResponseEntity.ok().build();
     }
 
     private List<String> buildSaltWords(String notIncludeWordId, List<WordOutShort> wordsForLeanr) {

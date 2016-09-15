@@ -2,8 +2,9 @@ package ru.proshik.jalmew.word.controller;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.proshik.jalmew.word.client.YTranslateServiceClient;
@@ -32,13 +33,8 @@ public class WordController {
     @Autowired
     private YTranslateServiceClient yTranslateServiceClient;
 
-    @RequestMapping(value = "/available")
-    public String available(Principal principal) {
-        return "Available word-service for user: " + principal.getName();
-    }
-
-    // TODO: 19.08.16 только внутренний
     @Transactional
+//    @PreAuthorize("#oauth2.hasScope('server')")
     @RequestMapping(method = RequestMethod.POST, value = "words/{word}")
     public ResponseEntity add(@PathVariable("word") String word) {
 
@@ -80,6 +76,7 @@ public class WordController {
 
         Word foundWord = wordRepository.searchByText(word);
 
+        // TODO: 15.09.16 выпилить получение слов через yTranslate. Это должен быть поиск только по сохраненным словам
         if (foundWord == null) {
             YTranslateWord translate = yTranslateServiceClient.translate(word);
             if (translate.getDef().isEmpty()) {
@@ -94,8 +91,9 @@ public class WordController {
         return ResponseEntity.ok(toOutShort(foundWord));
     }
 
+    @PreAuthorize("#oauth2.hasScope('server')")
     @RequestMapping(value = "words/{wordId}")
-    public ResponseEntity getById(@PathVariable("wordId") String wordId) {
+    public ResponseEntity get(@PathVariable("wordId") String wordId) {
 
         if (wordId == null) {
             return ResponseEntity.badRequest().build();
@@ -110,6 +108,8 @@ public class WordController {
         return ResponseEntity.ok(toOutShort(word));
     }
 
+    // TODO: 15.09.16 можно убрать, после того, как будет реализован метод search с возможность задания ?wordId=...&wordId=...
+    @PreAuthorize("#oauth2.hasScope('server')")
     @RequestMapping(value = "words")
     public ResponseEntity getByIds(@RequestParam("wordId") List<String> wordIds) {
 
@@ -146,35 +146,42 @@ public class WordController {
 
         /**
          * Two various
+         * ***********
+
+         Definition def = translate.getDef().stream()
+         .findFirst()
+         .orElseThrow(() -> new IllegalArgumentException());
+
+         Definition def = translate.getDef().stream()
+         .findFirst()
+         .orElseThrow(IllegalArgumentException::new);
+
+         return new Word(sourceWord, def.getTs(), def.getTr().stream()
+         .map(tr -> new Translated(def.getText(), tr.getText(), def.getTs(), tr.getGen(), tr.getEx().stream()
+         .map(ex -> new Example(ex.getText(), ex.getText()))
+         .collect(Collectors.toList())))
+         .collect(Collectors.toList()));
+
+         *
          */
-//        Definition def = translate.getDef().stream()
-//                .findFirst()
-//                .orElseThrow(() -> new IllegalArgumentException());
-//
-//        Definition def = translate.getDef().stream()
-//                .findFirst()
-//                .orElseThrow(IllegalArgumentException::new);
-//
-//        return new Word(sourceWord, def.getTs(), def.getTr().stream()
-//                .map(tr -> new Translated(def.getText(), tr.getText(), def.getTs(), tr.getGen(), tr.getEx().stream()
-//                        .map(ex -> new Example(ex.getText(), ex.getText()))
-//                        .collect(Collectors.toList())))
-//                .collect(Collectors.toList()));
 
         /**
          * Third various
+         * *************
+
+         List<Word> collect = translate.getDef().stream()
+         .map(def -> new Word(sourceWord, def.getTr().stream()
+         .map(tr -> new Translated(def.getText(), tr.getText(), def.getTs(), def.getPos(), tr.getGen(), tr.getEx().stream()
+         .map(ex -> new Example(ex.getText(), ex.getText()))
+         .collect(Collectors.toList())))
+         .collect(Collectors.toList())))
+         .collect(Collectors.toList());
+
+         *
          */
-//        List<Word> collect = translate.getDef().stream()
-//                .map(def -> new Word(sourceWord, def.getTr().stream()
-//                        .map(tr -> new Translated(def.getText(), tr.getText(), def.getTs(), def.getPos(), tr.getGen(), tr.getEx().stream()
-//                                .map(ex -> new Example(ex.getText(), ex.getText()))
-//                                .collect(Collectors.toList())))
-//                        .collect(Collectors.toList())))
-//                .collect(Collectors.toList());
     }
 
     private WordOutShort toOutShort(Word word) {
-
         Translated translated = word.getTranslated().stream()
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);

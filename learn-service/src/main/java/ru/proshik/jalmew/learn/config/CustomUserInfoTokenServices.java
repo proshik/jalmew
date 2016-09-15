@@ -94,11 +94,13 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
     private OAuth2Request getRequest(Map<String, Object> map) {
         Map<String, Object> request = (Map<String, Object>) map.get("oauth2Request");
 
+        Map<String, String> requestParameters = (Map<String, String>) request.get("requestParameters");
+
         String clientId = (String) request.get("clientId");
         Set<String> scope = new LinkedHashSet<>(request.containsKey("scope") ?
                 (Collection<String>) request.get("scope") : Collections.<String>emptySet());
 
-        return new OAuth2Request(null, clientId, null, true, new HashSet<>(scope),
+        return new OAuth2Request(requestParameters, clientId, null, true, new HashSet<>(scope),
                 null, null, null, null);
     }
 

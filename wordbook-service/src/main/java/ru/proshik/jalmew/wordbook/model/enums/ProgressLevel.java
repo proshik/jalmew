@@ -8,6 +8,7 @@ public enum ProgressLevel {
     P0(0),
     P_25(25),
     P_50(50),
+    P_75(75),
     P_100(100);
 
     private int value;

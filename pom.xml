@@ -18,6 +18,7 @@
         <module>word-service</module>
         <module>ytranslate-service</module>
         <module>learn-service</module>
+        <module>common</module>
     </modules>
 
 
