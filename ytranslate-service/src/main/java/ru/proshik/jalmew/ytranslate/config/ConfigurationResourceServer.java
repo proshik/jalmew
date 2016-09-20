@@ -50,7 +50,7 @@ public class ConfigurationResourceServer extends ResourceServerConfigurerAdapter
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/yTranslate").permitAll()
+//                .antMatchers("/api/v1.0/translate").permitAll()
                 .anyRequest().authenticated();
     }
 

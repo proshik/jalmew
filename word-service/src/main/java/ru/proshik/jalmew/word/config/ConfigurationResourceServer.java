@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import ru.proshik.jalmew.common.security.CustomUserInfoTokenServices;
 
 /**
  * Created by proshik on 28.07.16.

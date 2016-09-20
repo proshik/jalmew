@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  * Created by proshik on 20.08.16.
  */
 @RestController
-@RequestMapping("learn")
+@RequestMapping("/api/v1.0")
 public class LearnController {
 
     @Autowired
@@ -37,7 +38,8 @@ public class LearnController {
     @Autowired
     private WordClient wordClient;
 
-    @RequestMapping(method = RequestMethod.GET, value = "training/words")
+    @PreAuthorize("#oauth2.hasScope('ui')")
+    @RequestMapping(method = RequestMethod.GET, value = "learn/training/words")
     public ResponseEntity trainingWordTranslate(Principal principal) {
 
         List<WordListOut> wordsOfUser = wordbookClient.listForLearn(principal.getName());
@@ -79,7 +81,8 @@ public class LearnController {
         return ResponseEntity.ok(new LearnTranslateWord(learnWords));
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "training/words/answer")
+    @PreAuthorize("#oauth2.hasScope('ui')")
+    @RequestMapping(method = RequestMethod.POST, value = "learn/training/words")
     public ResponseEntity trainingWordAnswer(@AuthenticationPrincipal Principal principal,
                                              @RequestBody List<AnswerTranslateWord> result) {
 

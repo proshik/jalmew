@@ -40,20 +40,20 @@ public class YTranslateControllerTest {
     public void translateTest() throws Exception {
         when(yandexDictClient.lookup("word")).thenReturn(new YTranslateWord());
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/yTranslate/translate?word=word"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1.0/translate?word=word"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.notNullValue()));
     }
 
     @Test
     public void translateNotValueInQueryParamsTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/yTranslate/translate?word="))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1.0/translate?word="))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test
     public void translateNotQueryParamsTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/yTranslate/translate"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1.0/translate"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 

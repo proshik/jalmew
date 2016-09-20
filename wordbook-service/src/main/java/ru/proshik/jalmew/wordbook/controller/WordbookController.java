@@ -110,7 +110,6 @@ public class WordbookController {
         return ResponseEntity.ok(wordClient.getById(wordId));
     }
 
-    @PreAuthorize("#oauth2.hasScope('ui')")
     @RequestMapping(method = RequestMethod.GET, value = "word")
     public ResponseEntity list(Principal principal) {
 
@@ -155,6 +154,7 @@ public class WordbookController {
                 .collect(Collectors.toList()));
     }
 
+    @PreAuthorize("#oauth2.hasScope('server')")
     @Transactional
     @RequestMapping(method = RequestMethod.POST, value = "word/learn/{userName}")
     public ResponseEntity saveStatistic(@PathVariable("userName") String userName,

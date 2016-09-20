@@ -56,12 +56,8 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <!--<dependency>-->
-        <!--<groupId>org.springframework.cloud</groupId>-->
-        <!--<artifactId>spring-cloud-starter-bus-amqp</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.springframework.cloud</groupId>-->
-        <!--<artifactId>spring-cloud-netflix-hystrix-stream</artifactId>-->
+            <!--<groupId>org.springframework.cloud</groupId>-->
+            <!--<artifactId>spring-cloud-netflix-hystrix-stream</artifactId>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -75,6 +71,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Jalmew -->
         <dependency>
             <groupId>ru.proshik.jalmew</groupId>
             <artifactId>common</artifactId>

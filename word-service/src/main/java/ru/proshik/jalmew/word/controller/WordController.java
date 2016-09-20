@@ -54,15 +54,7 @@ public class WordController {
 
             return ResponseEntity.ok(toOutShort(savedWord));
         } else {
-
-            YTranslateWord translate = yTranslateServiceClient.translate(word);
-            if (translate.getDef().isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Word save = wordRepository.save(toSave(translate, word));
-
-            return ResponseEntity.ok(toOutShort(save));
+            return ResponseEntity.ok(toOutShort(foundWord));
         }
     }
 
@@ -106,20 +98,6 @@ public class WordController {
         }
 
         return ResponseEntity.ok(toOutShort(word));
-    }
-
-    // TODO: 15.09.16 можно убрать, после того, как будет реализован метод search с возможность задания ?wordId=...&wordId=...
-    @PreAuthorize("#oauth2.hasScope('server')")
-    @RequestMapping(value = "words")
-    public ResponseEntity getByIds(@RequestParam("wordId") List<String> wordIds) {
-
-        List<Word> words = wordRepository.findByIdIn(wordIds);
-
-        if (words.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(toOutShort(words));
     }
 
     private Word toSave(YTranslateWord translate, String sourceWord) {

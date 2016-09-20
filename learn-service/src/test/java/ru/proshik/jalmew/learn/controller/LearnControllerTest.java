@@ -64,7 +64,7 @@ public class LearnControllerTest {
         when(wordbookClient.listForLearn("userName")).thenReturn(wordListOutFromWordbookService);
         when(wordClient.getByIds(anySet())).thenReturn(wordOutShortFromWordService);
 
-        mockMvc.perform(get("/learn/training/words").principal(getPrincipcal()))
+        mockMvc.perform(get("/api/v1.0/learn/training/words").principal(getPrincipcal()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.words[*]", hasSize(10)))
                 .andExpect(jsonPath("$.words[0].saltWords[*]", hasSize(5)))
@@ -99,7 +99,7 @@ public class LearnControllerTest {
     public void wordTranslateLessWordsInWordbookUserTest() throws Exception {
         when(wordbookClient.listForLearn("userName")).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/learn/training/words").principal(getPrincipcal()))
+        mockMvc.perform(get("/api/v1.0/learn/training/words").principal(getPrincipcal()))
                 .andExpect(status().isNoContent());
     }
 
@@ -107,7 +107,7 @@ public class LearnControllerTest {
     public void trainingWordAnswer() throws Exception {
         initDataTrainingWordAnswer();
 
-        mockMvc.perform(post("/learn/training/words/answer")
+        mockMvc.perform(post("/api/v1.0/learn/training/words")
                 .principal(getPrincipcal())
                 .content(mapper.writeValueAsString(answerResultList))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))

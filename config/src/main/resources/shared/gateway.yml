@@ -37,10 +37,8 @@ zuul:
     ytranslate-service:
       path: /yTranslate/**
       clientId: ytranslate-service
-      stripPrefix: false
 
     learn-service:
       path: /learn/**
       clientId: learn-service
-      stripPrefix: false
 
