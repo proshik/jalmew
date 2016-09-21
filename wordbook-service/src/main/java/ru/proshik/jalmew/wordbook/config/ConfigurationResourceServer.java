@@ -48,7 +48,7 @@ public class ConfigurationResourceServer extends ResourceServerConfigurerAdapter
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/wordbook" , "/wordbook/demo", "/wordbook/account/user").permitAll()
+                .antMatchers("/api/v1.0/account/user").permitAll()
                 .anyRequest().authenticated();
     }
 

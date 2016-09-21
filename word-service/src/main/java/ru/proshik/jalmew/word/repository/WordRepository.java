@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.proshik.jalmew.word.model.Word;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by proshik on 09.08.16.
@@ -17,7 +18,7 @@ public interface WordRepository extends MongoRepository<Word, String> {
 
     Word findOne(String id);
 
-    List<Word> findByIdIn(List<String> id);
+    List<Word> findByIdIn(Set<String> id);
 
     @Query("{'text' : ?0}")
     Word searchByText(String text);

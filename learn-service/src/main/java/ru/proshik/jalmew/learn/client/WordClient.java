@@ -17,7 +17,11 @@ import java.util.Set;
 @FeignClient("word-service")
 public interface WordClient {
 
-    @RequestMapping(method = RequestMethod.GET, value = "word/words")
+    @RequestMapping(method = RequestMethod.GET, value = "/api/v1.0/word")
     List<WordOutShort> getByIds(@RequestParam("wordId") Set<String> wordId);
+
+    // TODO: 22.09.16 убрать потом
+    @RequestMapping(method = RequestMethod.GET, value = "/api/v1.0/word/search")
+    List<WordOutShort> search(@RequestParam("wordId") Set<String> wordId);
 
 }

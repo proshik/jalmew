@@ -1,6 +1,7 @@
 package ru.proshik.jalmew.learn.client;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +18,13 @@ import java.util.List;
 @FeignClient("wordbook-service")
 public interface WordbookClient {
 
-    @RequestMapping(method = RequestMethod.GET, value = "wordbook/word/learn/{userName}")
+    @RequestMapping(method = RequestMethod.GET, value = "/api/v1.0/wordbook/training/words/{userName}")
     List<WordListOut> listForLearn(@PathVariable(value = "userName") String userName);
 
-    @RequestMapping(method = RequestMethod.POST, value = "wordbook/word/learn/{userName}")
+    @RequestMapping(
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+            value = "/api/v1.0/wordbook/training/words/statistic/{userName}")
     void saveStatistic(@PathVariable(value = "userName") String userName, List<AnswerTranslateWord> result);
 
 }

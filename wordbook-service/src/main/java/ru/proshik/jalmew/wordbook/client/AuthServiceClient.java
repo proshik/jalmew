@@ -11,7 +11,10 @@ import ru.proshik.jalmew.wordbook.controller.dto.UserDto;
 @FeignClient(name = "auth-service")
 public interface AuthServiceClient {
 
-    @RequestMapping(method = RequestMethod.POST, value = "/uaa/users", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(
+            method = RequestMethod.POST,
+            value = "/uaa/users",
+            consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     void createUser(UserDto user);
 
 }

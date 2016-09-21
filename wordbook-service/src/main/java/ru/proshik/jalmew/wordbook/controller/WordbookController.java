@@ -14,20 +14,20 @@ import ru.proshik.jalmew.wordbook.controller.dto.UserDto;
 import ru.proshik.jalmew.wordbook.controller.dto.WordAddIn;
 import ru.proshik.jalmew.wordbook.controller.dto.WordListOut;
 import ru.proshik.jalmew.wordbook.model.Wordbook;
+import ru.proshik.jalmew.wordbook.model.enums.ProgressLevel;
 import ru.proshik.jalmew.wordbook.repository.WordbookRepository;
 
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * Created by proshik on 24.07.16.
  */
 @RestController
-@RequestMapping(value = "/wordbook")
+@RequestMapping(value = "/api/v1.0")
 public class WordbookController {
 
     @Autowired
@@ -39,25 +39,20 @@ public class WordbookController {
     @Autowired
     private WordbookRepository wordbookRepository;
 
-    @RequestMapping(value = "/available")
-    public String available(Principal principal) {
-        return "Available wordbook-service for user: " + principal.getName();
-    }
-
     @RequestMapping(value = "account/user", method = RequestMethod.POST)
     public void createNewAccount(@Valid @RequestBody UserDto user) {
         authClient.createUser(user);
     }
 
     @Transactional
-    @RequestMapping(method = RequestMethod.POST, value = "word")
-    public ResponseEntity add(Principal principal, @RequestBody WordAddIn word) {
+    @RequestMapping(method = RequestMethod.POST, value = "wordbook")
+    public ResponseEntity addWord(Principal principal, @RequestBody WordAddIn word) {
 
         if (word == null || word.getWord() == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        WordOutShort foundWord = wordClient.search(word.getWord());
+        WordOutShort foundWord = wordClient.searchByText(word.getWord());
 
         // TODO: 12.08.16 добавить тут обработку разных статусо ответа( может быть 404 - не найдено). Логично вынести это в сервис
         if (foundWord == null) {
@@ -71,14 +66,15 @@ public class WordbookController {
             return ResponseEntity.ok(foundWord);
         }
 
+        // TODO: 22.09.16 убрать этот галимый get(0)
         wordbookRepository.save(new Wordbook(principal.getName(), foundWord.getId()));
 
         return ResponseEntity.ok(foundWord);
     }
 
     @Transactional
-    @RequestMapping(method = RequestMethod.POST, value = "word/{wordId}")
-    public ResponseEntity add(Principal principal, @PathVariable("wordId") String wordId) {
+    @RequestMapping(method = RequestMethod.POST, value = "wordbook/{wordId}")
+    public ResponseEntity addWord(Principal principal, @PathVariable("wordId") String wordId) {
 
         Wordbook wordFromWordbook = wordbookRepository.findByUsernameAndWordId(principal.getName(), wordId);
 
@@ -98,8 +94,8 @@ public class WordbookController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "word/{wordId}")
-    public ResponseEntity get(Principal principal, @PathVariable("wordId") String wordId) {
+    @RequestMapping(method = RequestMethod.GET, value = "wordbook/{wordId}")
+    public ResponseEntity getWord(Principal principal, @PathVariable("wordId") String wordId) {
 
         Wordbook userFromWordBook = wordbookRepository.findByUsernameAndWordId(principal.getName(), wordId);
 
@@ -110,8 +106,8 @@ public class WordbookController {
         return ResponseEntity.ok(wordClient.getById(wordId));
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "word")
-    public ResponseEntity list(Principal principal) {
+    @RequestMapping(method = RequestMethod.GET, value = "wordbook")
+    public ResponseEntity getWords(Principal principal) {
 
         List<Wordbook> wordIdsByByUser = wordbookRepository.findWordbooksByUsername(principal.getName());
 
@@ -126,7 +122,7 @@ public class WordbookController {
     }
 
     @Transactional
-    @RequestMapping(method = RequestMethod.DELETE, value = "word/{wordId}")
+    @RequestMapping(method = RequestMethod.DELETE, value = "wordbook/{wordId}")
     public ResponseEntity delete(Principal principal, @PathVariable("wordId") String wordId) {
 
         Wordbook wordFromWordbook = wordbookRepository.findByUsernameAndWordId(principal.getName(), wordId);
@@ -141,8 +137,10 @@ public class WordbookController {
     }
 
     @PreAuthorize("#oauth2.hasScope('server')")
-    @RequestMapping(method = RequestMethod.GET, value = "word/learn/{userName}")
-    public ResponseEntity listForLearn(@PathVariable("userName") String userName) {
+    @RequestMapping(method = RequestMethod.GET, value = "wordbook/training/words/{userName}")
+    public ResponseEntity trainingWords(@PathVariable("userName") String userName,
+                                        @RequestParam(value = "count", required = false) Integer count,
+                                        @RequestParam(value = "progressLevel", required = false) ProgressLevel levee) {
         List<Wordbook> wordIdsByByUser = wordbookRepository.findWordbooksByUsername(userName);
 
         if (wordIdsByByUser.isEmpty()) {
@@ -154,11 +152,11 @@ public class WordbookController {
                 .collect(Collectors.toList()));
     }
 
-    @PreAuthorize("#oauth2.hasScope('server')")
     @Transactional
-    @RequestMapping(method = RequestMethod.POST, value = "word/learn/{userName}")
-    public ResponseEntity saveStatistic(@PathVariable("userName") String userName,
-                                        @RequestBody List<AnswerTranslateWord> result) {
+    @PreAuthorize("#oauth2.hasScope('server')")
+    @RequestMapping(method = RequestMethod.POST, value = "wordbook/training/words/statistic/{userName}")
+    public ResponseEntity trainingWordsStatistic(@PathVariable("userName") String userName,
+                                                 @RequestBody List<AnswerTranslateWord> result) {
 
         List<Wordbook> wordbooks = wordbookRepository.findByUsernameAndWordIdIn(userName, getWordIds(result));
 

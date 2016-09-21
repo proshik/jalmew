@@ -40,7 +40,7 @@ public class LearnController {
 
     @PreAuthorize("#oauth2.hasScope('ui')")
     @RequestMapping(method = RequestMethod.GET, value = "learn/training/words")
-    public ResponseEntity trainingWordTranslate(Principal principal) {
+    public ResponseEntity trainingWordTranslate(@AuthenticationPrincipal Principal principal) {
 
         List<WordListOut> wordsOfUser = wordbookClient.listForLearn(principal.getName());
 
@@ -60,13 +60,13 @@ public class LearnController {
         Map<String, WordListOut> userWordsByWordId = userWordsForLearn.stream()
                 .collect(Collectors.toMap(WordListOut::getWordId, Function.identity()));
 
-        List<WordOutShort> wordDetailsForLearn = wordClient.getByIds(userWordsForLearn.stream()
+        List<WordOutShort> wordDetailsForLearn = wordClient.search(userWordsForLearn.stream()
                 .map(WordListOut::getWordId)
                 .collect(Collectors.toSet()));
 
         if (wordDetailsForLearn == null || wordDetailsForLearn.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+            }
 
         List<LearnWord> learnWords = wordDetailsForLearn.stream()
                 .map(w -> new LearnWord(

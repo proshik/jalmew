@@ -14,7 +14,7 @@ import ru.proshik.jalmew.word.client.ytranslate_dto.YTranslateWord;
 @FeignClient(name = "ytranslate-service")
 public interface YTranslateServiceClient {
 
-    @RequestMapping(method = RequestMethod.GET, value = "yTranslate/translate")
+    @RequestMapping(method = RequestMethod.GET, value = "api/v1.0/translate")
     YTranslateWord translate(@RequestParam("word") String word);
 
 }

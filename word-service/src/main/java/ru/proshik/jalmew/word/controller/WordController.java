@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.proshik.jalmew.word.client.YTranslateServiceClient;
@@ -15,16 +14,16 @@ import ru.proshik.jalmew.word.model.Translated;
 import ru.proshik.jalmew.word.model.Word;
 import ru.proshik.jalmew.word.repository.WordRepository;
 
-import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * Created by proshik on 28.07.16.
  */
 @RestController
-@RequestMapping(value = "/word")
+@RequestMapping(value = "/api/v1.0")
 public class WordController {
 
     @Autowired
@@ -34,8 +33,8 @@ public class WordController {
     private YTranslateServiceClient yTranslateServiceClient;
 
     @Transactional
-//    @PreAuthorize("#oauth2.hasScope('server')")
-    @RequestMapping(method = RequestMethod.POST, value = "words/{word}")
+    @PreAuthorize("#oauth2.hasScope('server')")
+    @RequestMapping(method = RequestMethod.POST, value = "word/{word}")
     public ResponseEntity add(@PathVariable("word") String word) {
 
         if (word == null) {
@@ -59,23 +58,24 @@ public class WordController {
     }
 
     @Transactional
-    @RequestMapping(method = RequestMethod.GET, value = "words/search")
-    public ResponseEntity search(@RequestParam("word") String word) {
+    @RequestMapping(method = RequestMethod.GET, value = "word")
+    public ResponseEntity search(@RequestParam(value = "text", required = false) String text,
+                                 @RequestParam(value = "wordId", required = false) List<String> wordId) {
 
-        if (word == null) {
+        if (text == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        Word foundWord = wordRepository.searchByText(word);
+        Word foundWord = wordRepository.searchByText(text);
 
         // TODO: 15.09.16 выпилить получение слов через yTranslate. Это должен быть поиск только по сохраненным словам
         if (foundWord == null) {
-            YTranslateWord translate = yTranslateServiceClient.translate(word);
+            YTranslateWord translate = yTranslateServiceClient.translate(text);
             if (translate.getDef().isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
-            Word savedWord = wordRepository.save(toSave(translate, word));
+            Word savedWord = wordRepository.save(toSave(translate, text));
 
             return ResponseEntity.ok(toOutShort(savedWord));
         }
@@ -83,8 +83,8 @@ public class WordController {
         return ResponseEntity.ok(toOutShort(foundWord));
     }
 
+    @RequestMapping(value = "word/{wordId}")
     @PreAuthorize("#oauth2.hasScope('server')")
-    @RequestMapping(value = "words/{wordId}")
     public ResponseEntity get(@PathVariable("wordId") String wordId) {
 
         if (wordId == null) {
@@ -98,6 +98,18 @@ public class WordController {
         }
 
         return ResponseEntity.ok(toOutShort(word));
+    }
+
+    @RequestMapping(value = "word/search")
+    public ResponseEntity getByIds(@RequestParam("wordId") Set<String> wordIds) {
+
+        List<Word> words = wordRepository.findByIdIn(wordIds);
+
+        if (words.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(toOutShort(words));
     }
 
     private Word toSave(YTranslateWord translate, String sourceWord) {

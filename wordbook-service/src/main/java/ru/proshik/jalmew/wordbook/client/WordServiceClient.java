@@ -18,13 +18,13 @@ import java.util.Set;
 @FeignClient("word-service")
 public interface WordServiceClient {
 
-    @RequestMapping(method = RequestMethod.GET, value = "word/words/{wordId}")
+    @RequestMapping(method = RequestMethod.GET, value = "/api/v1.0/word/{wordId}")
     WordOutShort getById(@PathVariable("wordId") String wordId);
 
-    @RequestMapping(method = RequestMethod.GET, value = "word/words")
-    List<WordOutShort> getByIds(@RequestParam("wordId") Set<String> wordIdsByByUser);
+    @RequestMapping(method = RequestMethod.GET, value = "/api/v1.0/word")
+    WordOutShort searchByIds(@RequestParam("wordId") Set<String> wordId);
 
-    @RequestMapping(method = RequestMethod.GET, value = "word/words/search")
-    WordOutShort search(@RequestParam("word") String word);
+    @RequestMapping(method = RequestMethod.GET, value = "/api/v1.0/word")
+    WordOutShort searchByText(@RequestParam("text") String word);
 
 }
