@@ -66,7 +66,6 @@ public class WordbookController {
             return ResponseEntity.ok(foundWord);
         }
 
-        // TODO: 22.09.16 убрать этот галимый get(0)
         wordbookRepository.save(new Wordbook(principal.getName(), foundWord.getId()));
 
         return ResponseEntity.ok(foundWord);

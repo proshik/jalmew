@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
 import ru.proshik.jalmew.ytranslate.client.YandexDictClient;
-import ru.proshik.jalmew.ytranslate.model.YTranslateWord;
 
 /**
  *

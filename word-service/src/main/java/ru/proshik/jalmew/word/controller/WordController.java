@@ -1,13 +1,18 @@
 package ru.proshik.jalmew.word.controller;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
 import ru.proshik.jalmew.word.client.YTranslateServiceClient;
-import ru.proshik.jalmew.word.client.ytranslate_dto.YTranslateWord;
 import ru.proshik.jalmew.word.controller.dto.WordOutShort;
 import ru.proshik.jalmew.word.model.Example;
 import ru.proshik.jalmew.word.model.Translated;
@@ -26,97 +31,86 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/api/v1.0")
 public class WordController {
 
+    private static final Logger log = LoggerFactory.getLogger(WordController.class);
+
     @Autowired
     private WordRepository wordRepository;
 
     @Autowired
     private YTranslateServiceClient yTranslateServiceClient;
 
+    @ExceptionHandler
+
+
     @Transactional
     @PreAuthorize("#oauth2.hasScope('server')")
-    @RequestMapping(method = RequestMethod.POST, value = "word/{word}")
-    public ResponseEntity add(@PathVariable("word") String word) {
-
-        if (word == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Word foundWord = wordRepository.searchByText(word);
-
-        if (foundWord == null) {
-            YTranslateWord translate = yTranslateServiceClient.translate(word);
-            if (translate.getDef().isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Word savedWord = wordRepository.save(toSave(translate, word));
-
-            return ResponseEntity.ok(toOutShort(savedWord));
-        } else {
-            return ResponseEntity.ok(toOutShort(foundWord));
-        }
-    }
-
-    @Transactional
-    @RequestMapping(method = RequestMethod.GET, value = "word")
-    public ResponseEntity search(@RequestParam(value = "text", required = false) String text,
-                                 @RequestParam(value = "wordId", required = false) List<String> wordId) {
-
-        if (text == null) {
-            return ResponseEntity.badRequest().build();
-        }
+    @RequestMapping(method = RequestMethod.POST, value = "word/{text}")
+    public ResponseEntity add(@PathVariable("text") String text, String theme, String section) {
 
         Word foundWord = wordRepository.searchByText(text);
 
-        // TODO: 15.09.16 выпилить получение слов через yTranslate. Это должен быть поиск только по сохраненным словам
         if (foundWord == null) {
             YTranslateWord translate = yTranslateServiceClient.translate(text);
             if (translate.getDef().isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
-            Word savedWord = wordRepository.save(toSave(translate, text));
+            foundWord = wordRepository.save(transform(translate, text, theme, section));
+        }
+        return ResponseEntity.ok(toOut(foundWord));
+    }
 
-            return ResponseEntity.ok(toOutShort(savedWord));
+    @Transactional
+    @RequestMapping(method = RequestMethod.GET, value = "word")
+    public ResponseEntity search(@RequestParam(value = "text", required = false) String text,
+                                 @RequestParam(value = "wordId", required = false) Set<String> wordId) {
+
+        Word foundWord = wordRepository.searchByText(text);
+
+        if (foundWord == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(toOutShort(foundWord));
+        return ResponseEntity.ok(toOut(wordRepository.searchByText(text)));
     }
 
     @RequestMapping(value = "word/{wordId}")
     @PreAuthorize("#oauth2.hasScope('server')")
     public ResponseEntity get(@PathVariable("wordId") String wordId) {
 
-        if (wordId == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
         Word word = wordRepository.findOne(wordId);
 
         if (word == null) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(toOutShort(word));
+        return ResponseEntity.ok(toOut(word));
     }
 
     @RequestMapping(value = "word/search")
     public ResponseEntity getByIds(@RequestParam("wordId") Set<String> wordIds) {
 
-        List<Word> words = wordRepository.findByIdIn(wordIds);
-
-        if (words.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(toOutShort(words));
+        return ResponseEntity.ok(toOut(wordRepository.findByIdIn(wordIds)));
     }
 
-    private Word toSave(YTranslateWord translate, String sourceWord) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Invalid parameters or content from body of request")
+    public void validationExceptionHandler() {
+        log.error("Validation request parameters/body content");
+    }
 
-        return new Word(sourceWord, translate.getDef().stream()
-                .flatMap(definition -> definition.getTr().stream()
-                        .map(tr -> new ImmutableTriple<>(definition.getText(), definition.getTs(), tr)))
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Required request body is missing")
+    public void errorOnReadRequestExceptionHandler(HttpMessageNotReadableException e) {
+        log.error("Error on read body from request", e);
+    }
+
+    private Word transform(YTranslateWord translate, String sourceWord, String theme, String section) {
+
+        return new Word(sourceWord, theme, section, translate.getDef().stream()
+                .flatMap(definition ->
+                        definition.getTr().stream()
+                                .map(tr -> new ImmutableTriple<>(definition.getText(), definition.getTs(), tr)))
                 .map(v -> new Translated(
                         v.getLeft(),
                         v.getMiddle(),
@@ -133,45 +127,9 @@ public class WordController {
                                 .collect(Collectors.toList())
                                 : Collections.emptyList()))
                 .collect(Collectors.toList()));
-
-        /**
-         * Two various
-         * ***********
-
-         Definition def = translate.getDef().stream()
-         .findFirst()
-         .orElseThrow(() -> new IllegalArgumentException());
-
-         Definition def = translate.getDef().stream()
-         .findFirst()
-         .orElseThrow(IllegalArgumentException::new);
-
-         return new Word(sourceWord, def.getTs(), def.getTr().stream()
-         .map(tr -> new Translated(def.getText(), tr.getText(), def.getTs(), tr.getGen(), tr.getEx().stream()
-         .map(ex -> new Example(ex.getText(), ex.getText()))
-         .collect(Collectors.toList())))
-         .collect(Collectors.toList()));
-
-         *
-         */
-
-        /**
-         * Third various
-         * *************
-
-         List<Word> collect = translate.getDef().stream()
-         .map(def -> new Word(sourceWord, def.getTr().stream()
-         .map(tr -> new Translated(def.getText(), tr.getText(), def.getTs(), def.getPos(), tr.getGen(), tr.getEx().stream()
-         .map(ex -> new Example(ex.getText(), ex.getText()))
-         .collect(Collectors.toList())))
-         .collect(Collectors.toList())))
-         .collect(Collectors.toList());
-
-         *
-         */
     }
 
-    private WordOutShort toOutShort(Word word) {
+    private WordOutShort toOut(Word word) {
         Translated translated = word.getTranslated().stream()
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
@@ -179,10 +137,10 @@ public class WordController {
         return new WordOutShort(word.getId(), word.getText(), translated.getTranslate(), translated.getTrs());
     }
 
-    private List<WordOutShort> toOutShort(List<Word> words) {
+    private List<WordOutShort> toOut(List<Word> words) {
 
         return words.stream()
-                .map(this::toOutShort)
+                .map(this::toOut)
                 .collect(Collectors.toList());
     }
 

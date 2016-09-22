@@ -62,7 +62,7 @@ public class LearnControllerTest {
         initDataWordTranslate();
 
         when(wordbookClient.listForLearn("userName")).thenReturn(wordListOutFromWordbookService);
-        when(wordClient.getByIds(anySet())).thenReturn(wordOutShortFromWordService);
+        when(wordClient.search(anySet())).thenReturn(wordOutShortFromWordService);
 
         mockMvc.perform(get("/api/v1.0/learn/training/words").principal(getPrincipcal()))
                 .andExpect(status().isOk())

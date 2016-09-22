@@ -19,9 +19,7 @@ public class WordbookStatistic {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "wordbook_statistic_seq")
     @GenericGenerator(name = "wordbook_statistic_seq", strategy = "enhanced-sequence",
             parameters = {
-                    @org.hibernate.annotations.Parameter(
-                            name = SequenceStyleGenerator.SEQUENCE_PARAM,
-                            value = "wordbook_statistic_seq"),
+                    @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.SEQUENCE_PARAM, value = "wordbook_statistic_seq"),
                     @org.hibernate.annotations.Parameter(name = SequenceStyleGenerator.INCREMENT_PARAM, value = "1")})
     private Long id;
 

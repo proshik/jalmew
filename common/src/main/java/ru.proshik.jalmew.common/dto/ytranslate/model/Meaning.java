@@ -1,13 +1,13 @@
-package ru.proshik.jalmew.word.client.ytranslate_dto;
+package ru.proshik.jalmew.common.dto.ytranslate.model;
 
 /**
  * Created by proshik on 22.05.16.
  */
-public class ExampleTransfer {
+public class Meaning {
 
     private String text;
 
-    public ExampleTransfer() {
+    public Meaning() {
     }
 
     public String getText() {

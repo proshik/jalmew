@@ -1,4 +1,4 @@
-package ru.proshik.jalmew.ytranslate.model;
+package ru.proshik.jalmew.common.dto.ytranslate.model;
 
 import java.util.List;
 

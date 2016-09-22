@@ -16,12 +16,28 @@ public class Word {
     @Id
     private String id;
 
+    /**
+     * Значение в исходном языке
+     */
     private String text;
 
+    /**
+     * Тема слова
+     */
+    private String theme;
+
+    /**
+     * Раздел (пр. Топ 1000, Топ 3000)
+     */
+    private String section;
+
+    /**
+     * Массив переводов
+     */
     private List<Translated> translated = new ArrayList<>();
 
     @PersistenceConstructor
-    public Word(String text, List<Translated> translated) {
+    public Word(String text, String theme, String section, List<Translated> translated) {
         this.text = text;
         this.translated = translated;
     }
@@ -32,6 +48,14 @@ public class Word {
 
     public String getText() {
         return text;
+    }
+
+    public String getTheme() {
+        return theme;
+    }
+
+    public String getSection() {
+        return section;
     }
 
     public List<Translated> getTranslated() {

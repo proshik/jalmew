@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
+import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
 import ru.proshik.jalmew.ytranslate.client.common.AbstractRestClient;
-import ru.proshik.jalmew.ytranslate.model.YTranslateWord;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;

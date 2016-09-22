@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.proshik.jalmew.word.client.ytranslate_dto.YTranslateWord;
+import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
 
 /**
  * Created by proshik on 09.08.16.

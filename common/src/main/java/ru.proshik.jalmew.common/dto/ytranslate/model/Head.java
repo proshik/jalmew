@@ -1,4 +1,4 @@
-package ru.proshik.jalmew.word.client.ytranslate_dto;
+package ru.proshik.jalmew.common.dto.ytranslate.model;
 
 /**
  * Created by proshik on 22.05.16.

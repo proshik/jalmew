@@ -6,14 +6,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
 import ru.proshik.jalmew.ytranslate.client.YandexDictClient;
-import ru.proshik.jalmew.ytranslate.model.YTranslateWord;
 
 import static org.mockito.Mockito.when;
 
