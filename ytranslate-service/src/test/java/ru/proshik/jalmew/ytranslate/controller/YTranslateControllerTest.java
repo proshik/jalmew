@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
+import ru.proshik.jalmew.common.model.ytranslate.YTranslateWordOut;
 import ru.proshik.jalmew.ytranslate.client.YandexDictClient;
 
 import static org.mockito.Mockito.when;
@@ -29,7 +29,6 @@ public class YTranslateControllerTest {
     @InjectMocks
     private YTranslateController yTranslateController = new YTranslateController();
 
-
     @Before
     public void init() {
         mockMvc = MockMvcBuilders.standaloneSetup(yTranslateController).build();
@@ -37,7 +36,7 @@ public class YTranslateControllerTest {
 
     @Test
     public void translateTest() throws Exception {
-        when(yandexDictClient.lookup("word")).thenReturn(new YTranslateWord());
+        when(yandexDictClient.lookup("word")).thenReturn(new YTranslateWordOut());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1.0/translate?word=word"))
                 .andExpect(MockMvcResultMatchers.status().isOk())

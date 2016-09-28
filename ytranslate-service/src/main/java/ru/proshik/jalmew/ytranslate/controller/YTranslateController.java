@@ -10,11 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
+import ru.proshik.jalmew.common.model.ytranslate.YTranslateWordOut;
 import ru.proshik.jalmew.ytranslate.client.YandexDictClient;
 
 /**
- *
  * Created by proshik on 30.07.16.
  */
 @RestController
@@ -28,18 +27,13 @@ public class YTranslateController {
     @RequestMapping(value = "translate", method = RequestMethod.GET)
     public ResponseEntity translate(@RequestParam("word") @NotEmpty String word) {
 
-        if (validate(word)) {
-            YTranslateWord yTranslateWord = yandexDictClient.lookup(word);
+        if (!StringUtils.isEmpty(word)) {
+            YTranslateWordOut yTranslateWord = yandexDictClient.lookup(word);
 
             return ResponseEntity.ok(yTranslateWord);
         } else {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-    }
-
-
-    private boolean validate(String word) {
-        return !StringUtils.isEmpty(word);
     }
 
 }

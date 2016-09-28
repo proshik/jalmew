@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.proshik.jalmew.learn.client.dto.WordOutShort;
+import ru.proshik.jalmew.common.model.word.WordOut;
 
 import java.util.List;
 import java.util.Set;
@@ -18,10 +18,6 @@ import java.util.Set;
 public interface WordClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/api/v1.0/word")
-    List<WordOutShort> getByIds(@RequestParam("wordId") Set<String> wordId);
-
-    // TODO: 22.09.16 убрать потом
-    @RequestMapping(method = RequestMethod.GET, value = "/api/v1.0/word/search")
-    List<WordOutShort> search(@RequestParam("wordId") Set<String> wordId);
+    List<WordOut> search(@RequestParam("wordId") Set<String> wordId);
 
 }

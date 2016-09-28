@@ -11,17 +11,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
+import ru.proshik.jalmew.common.model.word.Ex;
+import ru.proshik.jalmew.common.model.word.Tr;
+import ru.proshik.jalmew.common.model.word.WordOut;
+import ru.proshik.jalmew.common.model.word.WordShortOut;
+import ru.proshik.jalmew.common.model.ytranslate.ExampleTransfer;
+import ru.proshik.jalmew.common.model.ytranslate.YTranslateWordOut;
 import ru.proshik.jalmew.word.client.YTranslateServiceClient;
-import ru.proshik.jalmew.word.controller.dto.WordOutShort;
-import ru.proshik.jalmew.word.model.Example;
-import ru.proshik.jalmew.word.model.Translated;
-import ru.proshik.jalmew.word.model.Word;
+import ru.proshik.jalmew.word.repository.model.Example;
+import ru.proshik.jalmew.word.repository.model.Translated;
+import ru.proshik.jalmew.word.repository.model.Word;
 import ru.proshik.jalmew.word.repository.WordRepository;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -39,39 +42,36 @@ public class WordController {
     @Autowired
     private YTranslateServiceClient yTranslateServiceClient;
 
-    @ExceptionHandler
-
-
     @Transactional
     @PreAuthorize("#oauth2.hasScope('server')")
     @RequestMapping(method = RequestMethod.POST, value = "word/{text}")
     public ResponseEntity add(@PathVariable("text") String text, String theme, String section) {
 
-        Word foundWord = wordRepository.searchByText(text);
+        Word foundWord = wordRepository.searchByTest(text);
 
         if (foundWord == null) {
-            YTranslateWord translate = yTranslateServiceClient.translate(text);
+            YTranslateWordOut translate = yTranslateServiceClient.translate(text);
             if (translate.getDef().isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
             foundWord = wordRepository.save(transform(translate, text, theme, section));
         }
-        return ResponseEntity.ok(toOut(foundWord));
+        return ResponseEntity.ok(toOutShort(foundWord));
     }
 
     @Transactional
     @RequestMapping(method = RequestMethod.GET, value = "word")
     public ResponseEntity search(@RequestParam(value = "text", required = false) String text,
-                                 @RequestParam(value = "wordId", required = false) Set<String> wordId) {
+                                 @RequestParam(value = "wordId", required = false) List<String> wordId) {
 
-        Word foundWord = wordRepository.searchByText(text);
+        List<Word> foundWord = wordRepository.search(text, wordId);
 
         if (foundWord == null) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(toOut(wordRepository.searchByText(text)));
+        return ResponseEntity.ok(toOut(foundWord));
     }
 
     @RequestMapping(value = "word/{wordId}")
@@ -87,12 +87,6 @@ public class WordController {
         return ResponseEntity.ok(toOut(word));
     }
 
-    @RequestMapping(value = "word/search")
-    public ResponseEntity getByIds(@RequestParam("wordId") Set<String> wordIds) {
-
-        return ResponseEntity.ok(toOut(wordRepository.findByIdIn(wordIds)));
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Invalid parameters or content from body of request")
     public void validationExceptionHandler() {
@@ -105,7 +99,7 @@ public class WordController {
         log.error("Error on read body from request", e);
     }
 
-    private Word transform(YTranslateWord translate, String sourceWord, String theme, String section) {
+    private Word transform(YTranslateWordOut translate, String sourceWord, String theme, String section) {
 
         return new Word(sourceWord, theme, section, translate.getDef().stream()
                 .flatMap(definition ->
@@ -123,24 +117,56 @@ public class WordController {
                                 : null,
                         v.getRight().getEx() != null
                                 ? v.getRight().getEx().stream()
-                                .map(ex -> new Example(ex.getText(), ex.getText()))
+                                .map(ex -> new Example(ex.getText(), ex.getTr().stream()
+                                        .findFirst()
+                                        .orElseGet(ExampleTransfer::new)
+                                        .getText()))
                                 .collect(Collectors.toList())
                                 : Collections.emptyList()))
                 .collect(Collectors.toList()));
     }
 
-    private WordOutShort toOut(Word word) {
-        Translated translated = word.getTranslated().stream()
-                .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
-
-        return new WordOutShort(word.getId(), word.getText(), translated.getTranslate(), translated.getTrs());
+    private WordOut toOut(Word word) {
+        return new WordOut(
+                word.getId(),
+                word.getText(),
+                word.getTheme(),
+                word.getSection(),
+                word.getTranslated().stream()
+                        .map(tr -> new Tr(
+                                tr.getText(),
+                                tr.getTranslate(),
+                                tr.getTrs(),
+                                tr.getPartOfSpeech(),
+                                tr.getGen(),
+                                tr.getExamples().stream()
+                                        .map(ex -> new Ex(
+                                                ex.getText(),
+                                                ex.getTranslate()))
+                                        .collect(Collectors.toList())))
+                        .collect(Collectors.toList()));
     }
 
-    private List<WordOutShort> toOut(List<Word> words) {
-
-        return words.stream()
+    private List<WordOut> toOut(List<Word> word) {
+        return word.stream()
                 .map(this::toOut)
+                .collect(Collectors.toList());
+    }
+
+    private WordShortOut toOutShort(Word word) {
+        Translated translated = word.getTranslated().stream()
+                .findFirst()
+                .orElseGet(Translated::new);
+
+        return new WordShortOut(word.getId(),
+                word.getText(),
+                translated.getTranslate(),
+                translated.getTrs());
+    }
+
+    private List<WordShortOut> toOutShort(List<Word> word) {
+        return word.stream()
+                .map(this::toOutShort)
                 .collect(Collectors.toList());
     }
 

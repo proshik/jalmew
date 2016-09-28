@@ -1,26 +1,32 @@
 package ru.proshik.jalmew.wordbook.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import ru.proshik.jalmew.common.model.learn.TrainingWordResultRequest;
+import ru.proshik.jalmew.common.model.word.WordOut;
+import ru.proshik.jalmew.common.model.word.WordShortOut;
+import ru.proshik.jalmew.common.model.wordbook.WordbookAddResponse;
+import ru.proshik.jalmew.common.model.wordbook.WordbookOut;
+import ru.proshik.jalmew.common.model.wordbook.WordbookShortOut;
 import ru.proshik.jalmew.wordbook.client.AuthServiceClient;
-import ru.proshik.jalmew.wordbook.client.WordServiceClient;
-import ru.proshik.jalmew.wordbook.client.dto.WordOutShort;
-import ru.proshik.jalmew.wordbook.controller.dto.AnswerTranslateWord;
-import ru.proshik.jalmew.wordbook.controller.dto.UserDto;
-import ru.proshik.jalmew.wordbook.controller.dto.WordAddIn;
-import ru.proshik.jalmew.wordbook.controller.dto.WordListOut;
-import ru.proshik.jalmew.wordbook.model.Wordbook;
-import ru.proshik.jalmew.wordbook.model.enums.ProgressLevel;
+import ru.proshik.jalmew.wordbook.client.WordClient;
+import ru.proshik.jalmew.wordbook.controller.model.*;
+import ru.proshik.jalmew.wordbook.repository.model.Wordbook;
+import ru.proshik.jalmew.wordbook.repository.model.ProgressLevel;
 import ru.proshik.jalmew.wordbook.repository.WordbookRepository;
 
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -34,25 +40,21 @@ public class WordbookController {
     private AuthServiceClient authClient;
 
     @Autowired
-    private WordServiceClient wordClient;
+    private WordClient wordClient;
 
     @Autowired
     private WordbookRepository wordbookRepository;
 
     @RequestMapping(value = "account/user", method = RequestMethod.POST)
-    public void createNewAccount(@Valid @RequestBody UserDto user) {
+    public void createNewAccount(@Valid @RequestBody UserRequest user) {
         authClient.createUser(user);
     }
 
     @Transactional
     @RequestMapping(method = RequestMethod.POST, value = "wordbook")
-    public ResponseEntity addWord(Principal principal, @RequestBody WordAddIn word) {
+    public ResponseEntity addWord(Principal principal, @RequestBody @Valid WordbookAddResponse word) {
 
-        if (word == null || word.getWord() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        WordOutShort foundWord = wordClient.searchByText(word.getWord());
+        WordShortOut foundWord = wordClient.add(word.getWord());
 
         // TODO: 12.08.16 добавить тут обработку разных статусо ответа( может быть 404 - не найдено). Логично вынести это в сервис
         if (foundWord == null) {
@@ -81,14 +83,14 @@ public class WordbookController {
             return ResponseEntity.status(HttpStatus.CONFLICT.value()).build();
         }
 
-        WordOutShort word = wordClient.getById(wordId);
+        WordOut word = wordClient.getById(wordId);
 
         // TODO: 12.08.16 добавить тут обработку разных статусо ответа( может быть 404 - не найдено). Логично вынести это в сервис
         if (word == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        wordbookRepository.save(new Wordbook(principal.getName(), wordId));
+        wordbookRepository.save(new Wordbook(principal.getName(), word.getId()));
 
         return ResponseEntity.ok().build();
     }
@@ -96,27 +98,35 @@ public class WordbookController {
     @RequestMapping(method = RequestMethod.GET, value = "wordbook/{wordId}")
     public ResponseEntity getWord(Principal principal, @PathVariable("wordId") String wordId) {
 
-        Wordbook userFromWordBook = wordbookRepository.findByUsernameAndWordId(principal.getName(), wordId);
+        Wordbook wordFromWordbook = wordbookRepository.findByUsernameAndWordId(principal.getName(), wordId);
 
-        if (userFromWordBook == null) {
+        if (wordFromWordbook == null) {
             return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(wordClient.getById(wordId));
+        return ResponseEntity.ok(new WordbookOut(
+                wordClient.getById(wordId),
+                wordFromWordbook.getStatistic().getProgressLevel().getValue()));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "wordbook")
-    public ResponseEntity getWords(Principal principal) {
+    public ResponseEntity getWords(@AuthenticationPrincipal Principal principal,
+                                   @PageableDefault Pageable pageable) {
 
-        List<Wordbook> wordIdsByByUser = wordbookRepository.findWordbooksByUsername(principal.getName());
+        List<Wordbook> wordbookUser = wordbookRepository.findByUsername(principal.getName());
 
-        if (wordIdsByByUser.isEmpty()) {
+        if (wordbookUser.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        // TODO: 15.09.16 надо еще ходить в word-service за переводом слов
-        return ResponseEntity.ok(wordIdsByByUser.stream()
-                .map(wb -> new WordListOut(wb.getWordId(), wb.getStatistic().getProgressLevel().getValue()))
+        Map<String, WordOut> words = wordClient.searchByIds(
+                wordbookUser.stream()
+                        .map(Wordbook::getWordId)
+                        .collect(Collectors.toSet())).stream()
+                .collect(Collectors.toMap(WordOut::getId, Function.identity()));
+
+        return ResponseEntity.ok(wordbookUser.stream()
+                .map(wb -> new WordbookOut(words.get(wb.getWordId()), wb.getStatistic().getProgressLevel().getValue()))
                 .collect(Collectors.toList()));
     }
 
@@ -139,15 +149,16 @@ public class WordbookController {
     @RequestMapping(method = RequestMethod.GET, value = "wordbook/training/words/{userName}")
     public ResponseEntity trainingWords(@PathVariable("userName") String userName,
                                         @RequestParam(value = "count", required = false) Integer count,
-                                        @RequestParam(value = "progressLevel", required = false) ProgressLevel levee) {
-        List<Wordbook> wordIdsByByUser = wordbookRepository.findWordbooksByUsername(userName);
+                                        @RequestParam(value = "progressLevel", required = false) ProgressLevel level) {
+
+        List<Wordbook> wordIdsByByUser = wordbookRepository.findByUsername(userName);
 
         if (wordIdsByByUser.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(wordIdsByByUser.stream()
-                .map(wb -> new WordListOut(wb.getWordId(), wb.getStatistic().getProgressLevel().getValue()))
+                .map(wb -> new WordbookShortOut(wb.getWordId(), wb.getStatistic().getProgressLevel().getValue()))
                 .collect(Collectors.toList()));
     }
 
@@ -155,12 +166,16 @@ public class WordbookController {
     @PreAuthorize("#oauth2.hasScope('server')")
     @RequestMapping(method = RequestMethod.POST, value = "wordbook/training/words/statistic/{userName}")
     public ResponseEntity trainingWordsStatistic(@PathVariable("userName") String userName,
-                                                 @RequestBody List<AnswerTranslateWord> result) {
+                                                 @RequestBody List<TrainingWordResultRequest> result) {
 
-        List<Wordbook> wordbooks = wordbookRepository.findByUsernameAndWordIdIn(userName, getWordIds(result));
+        List<Wordbook> wordbooks = wordbookRepository.findByUsernameAndWordIdIn(
+                userName,
+                result.stream()
+                        .map(TrainingWordResultRequest::getWordId)
+                        .collect(Collectors.toList()));
 
         Map<String, Boolean> resultByWordId = result.stream()
-                .collect(Collectors.toMap(AnswerTranslateWord::getWordId, AnswerTranslateWord::isResult));
+                .collect(Collectors.toMap(TrainingWordResultRequest::getWordId, TrainingWordResultRequest::isResult));
 
         wordbooks.stream()
                 .filter(wordbook -> resultByWordId.get(wordbook.getWordId()))
@@ -169,12 +184,6 @@ public class WordbookController {
         wordbookRepository.save(wordbooks);
 
         return ResponseEntity.ok().build();
-    }
-
-    private List<String> getWordIds(List<AnswerTranslateWord> result) {
-        return result.stream()
-                .map(AnswerTranslateWord::getWordId)
-                .collect(Collectors.toList());
     }
 
 }

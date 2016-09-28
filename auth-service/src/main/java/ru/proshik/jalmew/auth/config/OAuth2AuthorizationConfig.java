@@ -33,6 +33,9 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        // TODO: 29.09.16 попробовать сюда добавить auth-service и обнловить его WebSecurityConfig,
+        // в метода configure(HttpSecurity http),
+        // добавив таким образом возможность прямо сюда пользователей добавлять.
         clients.inMemory()
                 .withClient("browser")
                 .authorizedGrantTypes("refresh_token", "password")

@@ -1,10 +1,10 @@
 package ru.proshik.jalmew.auth.service;
 
 
-import ru.proshik.jalmew.auth.controller.dto.UserDto;
+import ru.proshik.jalmew.auth.controller.dto.UserRequest;
 
 public interface UserService {
 
-    void create(UserDto user);
+    void create(UserRequest user);
 
 }

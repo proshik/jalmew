@@ -3,7 +3,8 @@ server:
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework: TRACE
+    org.hibernate: TRACE
 
 security:
   oauth2:

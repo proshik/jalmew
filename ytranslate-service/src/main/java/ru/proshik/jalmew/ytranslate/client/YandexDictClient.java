@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.proshik.jalmew.common.dto.ytranslate.model.YTranslateWord;
-import ru.proshik.jalmew.ytranslate.client.common.AbstractRestClient;
+import ru.proshik.jalmew.common.model.ytranslate.YTranslateWordOut;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
@@ -22,7 +22,7 @@ import java.net.URI;
  * --yandex.client.dict.key="<>you key received from yandex>"
  */
 @Component
-public class YandexDictClient extends AbstractRestClient {
+public class YandexDictClient {
 
     private static final Logger log = LoggerFactory.getLogger(YandexDictClient.class);
 
@@ -35,13 +35,15 @@ public class YandexDictClient extends AbstractRestClient {
     @Value("${yandex.client.dict.lang}")
     private String yandexLang;
 
+    private RestTemplate template = new RestTemplate();
+
     @PostConstruct
     public void init() {
         if (StringUtils.isEmpty(yandexKey) || StringUtils.isEmpty(yandexLang))
             throw new NullPointerException("params key or lang for y.dict is not set");
     }
 
-    public YTranslateWord lookup(String word) {
+    public YTranslateWordOut lookup(String word) {
         log.debug("{YANDEX-CLIENT_LOOKUP} send request to y.dict for word=" + word);
 
         URI uri = UriComponentsBuilder.fromUriString(yandexRootUrl)
@@ -50,7 +52,7 @@ public class YandexDictClient extends AbstractRestClient {
                 .queryParam("text", word)
                 .build().toUri();
 
-        return getTemplate().getForObject(uri, YTranslateWord.class);
+        return template.getForObject(uri, YTranslateWordOut.class);
     }
 
 }
