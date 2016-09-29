@@ -5,7 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import ru.proshik.jalmew.wordbook.controller.model.UserRequest;
+import ru.proshik.jalmew.common.model.wordbook.UserRequest;
 
 @Component
 @FeignClient(name = "auth-service")

@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import ru.proshik.jalmew.auth.controller.dto.UserRequest;
 import ru.proshik.jalmew.auth.service.UserService;
+import ru.proshik.jalmew.common.model.wordbook.UserRequest;
 
 import javax.validation.Valid;
 import java.security.Principal;

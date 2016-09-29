@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import ru.proshik.jalmew.auth.controller.dto.UserRequest;
 import ru.proshik.jalmew.auth.repository.model.User;
 import ru.proshik.jalmew.auth.repository.UserRepository;
+import ru.proshik.jalmew.common.model.wordbook.UserRequest;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -24,11 +24,12 @@ public class UserServiceImpl implements UserService {
     public void create(UserRequest userDto) {
 
         User findUser = repository.findByUsername(userDto.getUsername());
+
         Assert.isNull(findUser, "user already exists: " + userDto.getUsername());
 
         String passwordHash = encoder.encode(userDto.getPassword());
 
-        repository.save(new User(userDto.getUsername(), passwordHash));
+        repository.save(new User(userDto.getUsername(), passwordHash, userDto.getEmail()));
 
         log.info("new user has been created: {}", userDto.getUsername());
     }

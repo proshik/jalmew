@@ -42,14 +42,15 @@ public class User implements UserDetails {
     private String email;
 
     @Column(name = "confirm_email")
-    private Boolean confirmEmail;
+    private Boolean confirmEmail = Boolean.FALSE;
 
     public User() {
     }
 
-    public User(String username, String password) {
+    public User(String username, String password, String email) {
         this.username = username;
         this.password = password;
+        this.email = email;
     }
 
     @Override

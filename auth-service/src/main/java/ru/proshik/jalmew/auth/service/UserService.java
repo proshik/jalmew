@@ -1,7 +1,7 @@
 package ru.proshik.jalmew.auth.service;
 
 
-import ru.proshik.jalmew.auth.controller.dto.UserRequest;
+import ru.proshik.jalmew.common.model.wordbook.UserRequest;
 
 public interface UserService {
 

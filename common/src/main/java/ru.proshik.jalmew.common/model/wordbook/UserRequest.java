@@ -1,5 +1,6 @@
-package ru.proshik.jalmew.wordbook.controller.model;
+package ru.proshik.jalmew.common.model.wordbook;
 
+import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
@@ -14,6 +15,10 @@ public class UserRequest {
     private String username;
 
     @NotNull
+    @Email
+    private String email;
+
+    @NotNull
     @Length(min = 6, max = 40)
     private String password;
 
@@ -23,6 +28,14 @@ public class UserRequest {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setUsername(String username) {
