@@ -11,6 +11,9 @@ public class Ex {
 
     private String translate;
 
+    public Ex() {
+    }
+
     public Ex(String text, String translate) {
         this.text = text;
         this.translate = translate;

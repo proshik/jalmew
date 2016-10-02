@@ -3,7 +3,8 @@ server:
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework: DEBUG
+    org.hibernate: DEBUG
 
 liquibase:
   change-log: classpath:db-changelog.xml

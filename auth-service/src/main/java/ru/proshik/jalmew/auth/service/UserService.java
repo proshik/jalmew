@@ -1,10 +1,10 @@
 package ru.proshik.jalmew.auth.service;
 
 
-import ru.proshik.jalmew.common.model.wordbook.UserRequest;
+import ru.proshik.jalmew.common.model.wordbook.RegistrationRequest;
 
 public interface UserService {
 
-    void create(UserRequest user);
+    void create(RegistrationRequest user);
 
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import ru.proshik.jalmew.auth.repository.model.User;
 import ru.proshik.jalmew.auth.repository.UserRepository;
-import ru.proshik.jalmew.common.model.wordbook.UserRequest;
+import ru.proshik.jalmew.common.model.wordbook.RegistrationRequest;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository repository;
 
     @Override
-    public void create(UserRequest userDto) {
+    public void create(RegistrationRequest userDto) {
 
         User findUser = repository.findByUsername(userDto.getUsername());
 

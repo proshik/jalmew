@@ -18,11 +18,14 @@ import ru.proshik.jalmew.common.model.word.WordShortOut;
 import ru.proshik.jalmew.common.model.ytranslate.ExampleTransfer;
 import ru.proshik.jalmew.common.model.ytranslate.YTranslateWordOut;
 import ru.proshik.jalmew.word.client.YTranslateServiceClient;
+import ru.proshik.jalmew.word.controller.exception.TranslateNotFoundException;
+import ru.proshik.jalmew.word.controller.exception.WordNotFoundException;
+import ru.proshik.jalmew.word.repository.WordRepository;
 import ru.proshik.jalmew.word.repository.model.Example;
 import ru.proshik.jalmew.word.repository.model.Translated;
 import ru.proshik.jalmew.word.repository.model.Word;
-import ru.proshik.jalmew.word.repository.WordRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,19 +48,10 @@ public class WordController {
     @Transactional
     @PreAuthorize("#oauth2.hasScope('server')")
     @RequestMapping(method = RequestMethod.POST, value = "word/{text}")
-    public ResponseEntity add(@PathVariable("text") String text, String theme, String section) {
+    public WordShortOut add(@PathVariable("text") String text, String theme, String section) {
 
-        Word foundWord = wordRepository.searchByTest(text);
-
-        if (foundWord == null) {
-            YTranslateWordOut translate = yTranslateServiceClient.translate(text);
-            if (translate.getDef().isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            foundWord = wordRepository.save(transform(translate, text, theme, section));
-        }
-        return ResponseEntity.ok(toOutShort(foundWord));
+        return toOutShort(wordRepository.searchByTest(text)
+                .orElseGet(() -> saveWord(getTranslateWord(text), text, theme, section)));
     }
 
     @Transactional
@@ -65,27 +59,22 @@ public class WordController {
     public ResponseEntity search(@RequestParam(value = "text", required = false) String text,
                                  @RequestParam(value = "wordId", required = false) List<String> wordId) {
 
-        List<Word> foundWord = wordRepository.search(text, wordId);
-
-        if (foundWord == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(toOut(foundWord));
+        return ResponseEntity.ok(toOut(wordRepository.search(
+                text,
+                wordId != null
+                        ? wordId
+                        : new ArrayList<>())));
     }
 
     @RequestMapping(value = "word/{wordId}")
     @PreAuthorize("#oauth2.hasScope('server')")
-    public ResponseEntity get(@PathVariable("wordId") String wordId) {
+    public WordOut get(@PathVariable("wordId") String wordId) {
 
-        Word word = wordRepository.findOne(wordId);
-
-        if (word == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(toOut(word));
+        return toOut(wordRepository.findOne(wordId)
+                .orElseThrow(() -> new WordNotFoundException(wordId)));
     }
+
+    /********* Exception Handlers *********/
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Invalid parameters or content from body of request")
@@ -97,6 +86,32 @@ public class WordController {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Required request body is missing")
     public void errorOnReadRequestExceptionHandler(HttpMessageNotReadableException e) {
         log.error("Error on read body from request", e);
+    }
+
+    @ExceptionHandler(TranslateNotFoundException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Translate not found")
+    public void translateNotFountExceptionHandler(TranslateNotFoundException e) {
+        log.error("Not exists translate word for text={}", e.getText());
+    }
+
+    @ExceptionHandler(WordNotFoundException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Word not found")
+    public void wordNotFountExceptionHandler(WordNotFoundException e) {
+        log.error("Word not found with wordId={}", e.getWordId());
+    }
+
+    private YTranslateWordOut getTranslateWord(String text) {
+
+        YTranslateWordOut translate = yTranslateServiceClient.translate(text);
+
+        if (translate == null || translate.isEmptyResult())
+            throw new TranslateNotFoundException(text);
+        else
+            return translate;
+    }
+
+    private Word saveWord(YTranslateWordOut yTranslateWordOut, String text, String theme, String section) {
+        return wordRepository.save(transform(yTranslateWordOut, text, theme, section));
     }
 
     private Word transform(YTranslateWordOut translate, String sourceWord, String theme, String section) {

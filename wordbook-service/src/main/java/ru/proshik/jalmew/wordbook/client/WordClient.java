@@ -16,7 +16,7 @@ import java.util.Set;
  * Created by proshik on 30.07.16.
  */
 @Component
-@FeignClient("word-service")
+@FeignClient(value = "word-service", decode404 = true)
 public interface WordClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/api/v1.0/word/{text}")

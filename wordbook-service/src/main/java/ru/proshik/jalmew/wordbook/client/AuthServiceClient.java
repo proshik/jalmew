@@ -5,7 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import ru.proshik.jalmew.common.model.wordbook.UserRequest;
+import ru.proshik.jalmew.common.model.wordbook.RegistrationRequest;
 
 @Component
 @FeignClient(name = "auth-service")
@@ -15,6 +15,6 @@ public interface AuthServiceClient {
             method = RequestMethod.POST,
             value = "/uaa/users",
             consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    void createUser(UserRequest user);
+    void createUser(RegistrationRequest user);
 
 }

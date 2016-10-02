@@ -19,8 +19,7 @@ public class WordShortOut {
 
     private String section;
 
-    public WordShortOut(String id) {
-        this.id = id;
+    public WordShortOut() {
     }
 
     public WordShortOut(String id, String text, String translate, String trs) {

@@ -2,15 +2,12 @@ package ru.proshik.jalmew.ytranslate.controller;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.proshik.jalmew.common.model.ytranslate.YTranslateWordOut;
 import ru.proshik.jalmew.ytranslate.client.YandexDictClient;
 
 /**
@@ -27,13 +24,7 @@ public class YTranslateController {
     @RequestMapping(value = "translate", method = RequestMethod.GET)
     public ResponseEntity translate(@RequestParam("word") @NotEmpty String word) {
 
-        if (!StringUtils.isEmpty(word)) {
-            YTranslateWordOut yTranslateWord = yandexDictClient.lookup(word);
-
-            return ResponseEntity.ok(yTranslateWord);
-        } else {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+        return ResponseEntity.ok(yandexDictClient.lookup(word));
     }
 
 }

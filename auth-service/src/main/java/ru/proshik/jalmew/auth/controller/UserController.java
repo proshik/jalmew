@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ru.proshik.jalmew.auth.service.UserService;
-import ru.proshik.jalmew.common.model.wordbook.UserRequest;
+import ru.proshik.jalmew.common.model.wordbook.RegistrationRequest;
 
 import javax.validation.Valid;
 import java.security.Principal;
@@ -26,7 +26,7 @@ public class UserController {
 
     @PreAuthorize("#oauth2.hasScope('server')")
     @RequestMapping(method = RequestMethod.POST)
-    public void createUser(@Valid @RequestBody UserRequest user) {
+    public void createUser(@Valid @RequestBody RegistrationRequest user) {
         userService.create(user);
     }
 

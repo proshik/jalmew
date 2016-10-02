@@ -11,7 +11,7 @@ import ru.proshik.jalmew.common.model.ytranslate.YTranslateWordOut;
  * Created by proshik on 09.08.16.
  */
 @Component
-@FeignClient(name = "ytranslate-service")
+@FeignClient(name = "ytranslate-service", decode404 = true)
 public interface YTranslateServiceClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "api/v1.0/translate")

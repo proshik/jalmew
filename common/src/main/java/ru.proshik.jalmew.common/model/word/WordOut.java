@@ -18,8 +18,7 @@ public class WordOut {
 
     private List<Tr> tr;
 
-    public WordOut(String id) {
-        this.id = id;
+    public WordOut() {
     }
 
     public WordOut(String id, String text, String theme, String section, List<Tr> tr) {

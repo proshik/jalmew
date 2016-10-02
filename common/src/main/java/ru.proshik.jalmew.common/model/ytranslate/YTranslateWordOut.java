@@ -21,4 +21,8 @@ public class YTranslateWordOut {
     public List<Definition> getDef() {
         return def;
     }
+
+    public boolean isEmptyResult(){
+        return def.isEmpty();
+    }
 }

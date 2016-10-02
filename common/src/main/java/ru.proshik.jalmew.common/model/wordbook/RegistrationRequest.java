@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 /**
  * Created by proshik on 26.07.16.
  */
-public class UserRequest {
+public class RegistrationRequest {
 
     @NotNull
     @Length(min = 3, max = 20)

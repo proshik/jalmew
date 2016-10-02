@@ -15,7 +15,7 @@ public class WordbookOut {
     }
 
     public WordbookOut(WordOut wordOut, int progressPercent) {
-        this. wordOut = wordOut;
+        this.wordOut = wordOut;
         this.progressPercent = progressPercent;
     }
 

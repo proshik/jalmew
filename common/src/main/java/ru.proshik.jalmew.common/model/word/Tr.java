@@ -20,6 +20,9 @@ public class Tr {
 
     private List<Ex> ex;
 
+    public Tr() {
+    }
+
     public Tr(String text, String translate, String trs, String partOfSpeech, String gen, List<Ex> ex) {
         this.text = text;
         this.translate = translate;

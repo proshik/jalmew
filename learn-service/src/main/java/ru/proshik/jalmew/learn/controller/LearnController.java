@@ -17,6 +17,7 @@ import ru.proshik.jalmew.common.model.wordbook.WordbookShortOut;
 import ru.proshik.jalmew.learn.client.WordClient;
 import ru.proshik.jalmew.learn.client.WordbookClient;
 
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
@@ -63,10 +64,6 @@ public class LearnController {
                 .map(WordbookShortOut::getWordId)
                 .collect(Collectors.toSet()));
 
-        if (wordDetailsForLearn == null || wordDetailsForLearn.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
         List<WordForLearnOut> learnWords = wordDetailsForLearn.stream()
                 .map(w -> new WordForLearnOut(
                         w.getId(),
@@ -89,7 +86,7 @@ public class LearnController {
     @PreAuthorize("#oauth2.hasScope('ui')")
     @RequestMapping(method = RequestMethod.PUT, value = "learn/training/words")
     public ResponseEntity trainingWordAnswer(@AuthenticationPrincipal Principal principal,
-                                             @RequestBody List<TrainingWordResultRequest> result) {
+                                             @RequestBody @Valid List<TrainingWordResultRequest> result) {
 
         wordbookClient.saveStatistic(principal.getName(), result);
 

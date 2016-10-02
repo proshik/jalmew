@@ -1,7 +1,9 @@
 package ru.proshik.jalmew.wordbook.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.proshik.jalmew.wordbook.repository.model.Wordbook;
@@ -18,11 +20,8 @@ public interface WordbookRepository extends JpaRepository<Wordbook, Long>, JpaSp
 
     List<Wordbook> findByUsernameAndWordIdIn(String username, List<String> wordIds);
 
-    // TODO: 29.09.16 delete comment after check it is working
-//    @Query("select w.wordId from Wordbook w where w.username = :username")
-    List<String> findWordIdByUsername(@Param("username") String username);
+    List<Wordbook> findByUsername(String userName);
 
-    // TODO: 29.09.16 delete comment after check it is working
-//    @Query("select w from Wordbook w where w.username = :username")
-    List<Wordbook> findByUsername(@Param("username") String username);
+    List<Wordbook> findByUsername(@Param("username") String username, Pageable pageable);
+
 }
