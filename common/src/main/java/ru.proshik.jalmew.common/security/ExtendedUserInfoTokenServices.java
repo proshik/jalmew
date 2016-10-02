@@ -17,15 +17,14 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
- * Extended implementation of {@link org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices}
+ * Extend of {@link org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices}
  * <p>
- * By default, it designed to return only user details. This class provides {@link #getRequest(Map)} method, which
- * returns clientId and scope of calling service. This information used in controller's security checks.
  */
-public class CustomUserInfoTokenServices implements ResourceServerTokenServices {
+public class ExtendedUserInfoTokenServices implements ResourceServerTokenServices {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
@@ -42,7 +41,7 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
 
     private AuthoritiesExtractor authoritiesExtractor = new FixedAuthoritiesExtractor();
 
-    public CustomUserInfoTokenServices(String userInfoEndpointUrl, String clientId) {
+    public ExtendedUserInfoTokenServices(String userInfoEndpointUrl, String clientId) {
         this.userInfoEndpointUrl = userInfoEndpointUrl;
         this.clientId = clientId;
     }
@@ -70,14 +69,23 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
         return extractAuthentication(map);
     }
 
+    @Override
+    public OAuth2AccessToken readAccessToken(String accessToken) {
+        throw new UnsupportedOperationException("Not supported: read access token");
+    }
+
     private OAuth2Authentication extractAuthentication(Map<String, Object> map) {
         Object principal = getPrincipal(map);
-        OAuth2Request request = getRequest(map);
+
         List<GrantedAuthority> authorities = this.authoritiesExtractor
                 .extractAuthorities(map);
+
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 principal, "N/A", authorities);
         token.setDetails(map);
+
+        OAuth2Request request = parseRequest(map);
+
         return new OAuth2Authentication(request, token);
     }
 
@@ -91,20 +99,21 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
     }
 
     @SuppressWarnings({"unchecked"})
-    private OAuth2Request getRequest(Map<String, Object> map) {
+    private OAuth2Request parseRequest(Map<String, Object> map) {
         Map<String, Object> request = (Map<String, Object>) map.get("oauth2Request");
 
+        String userName = (String) map.get("name");
         String clientId = (String) request.get("clientId");
-        Set<String> scope = new LinkedHashSet<>(request.containsKey("scope") ?
-                (Collection<String>) request.get("scope") : Collections.<String>emptySet());
+        Set<String> scope = new LinkedHashSet<>(
+                request.containsKey("scope")
+                        ? (Collection<String>) request.get("scope")
+                        : Collections.<String>emptySet());
+
+        Map<String, Serializable> exProperties = new HashMap<>();
+        exProperties.put("userName", userName);
 
         return new OAuth2Request(null, clientId, null, true, new HashSet<>(scope),
-                null, null, null, null);
-    }
-
-    @Override
-    public OAuth2AccessToken readAccessToken(String accessToken) {
-        throw new UnsupportedOperationException("Not supported: read access token");
+                null, null, null, exProperties);
     }
 
     @SuppressWarnings({"unchecked"})

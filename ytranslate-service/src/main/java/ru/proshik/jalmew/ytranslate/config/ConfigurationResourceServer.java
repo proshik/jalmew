@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-import ru.proshik.jalmew.common.security.CustomUserInfoTokenServices;
+import ru.proshik.jalmew.common.security.ExtendedUserInfoTokenServices;
 
 /**
  * Created by proshik on 30.07.16.
@@ -42,13 +42,12 @@ public class ConfigurationResourceServer extends ResourceServerConfigurerAdapter
 
     @Bean
     public ResourceServerTokenServices tokenServices() {
-        return new CustomUserInfoTokenServices(sso.getUserInfoUri(), sso.getClientId());
+        return new ExtendedUserInfoTokenServices(sso.getUserInfoUri(), sso.getClientId());
     }
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-//                .antMatchers("/api/v1.0/translate").permitAll()
                 .anyRequest().authenticated();
     }
 

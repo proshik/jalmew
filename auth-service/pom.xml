@@ -110,12 +110,12 @@
         <dependency>
             <groupId>ru.proshik.jalmew</groupId>
             <artifactId>common</artifactId>
-            <version>0.1.7-SNAPSHOT</version>
+            <version>0.1.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ru.proshik.jalmew</groupId>
             <artifactId>common</artifactId>
-            <version>0.1.7-SNAPSHOT</version>
+            <version>0.1.9-SNAPSHOT</version>
             <type>test-jar</type>
         </dependency>
 

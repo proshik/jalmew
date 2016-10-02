@@ -46,7 +46,7 @@ public class WordController {
     private YTranslateServiceClient yTranslateServiceClient;
 
     @Transactional
-    @PreAuthorize("#oauth2.hasScope('server')")
+//    @PreAuthorize("#oauth2.hasScope('server')")
     @RequestMapping(method = RequestMethod.POST, value = "word/{text}")
     public WordShortOut add(@PathVariable("text") String text, String theme, String section) {
 

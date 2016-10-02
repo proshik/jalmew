@@ -7,3 +7,10 @@ spring:
       fail-fast: true
       password: password
       username: user
+
+---
+spring:
+  profiles: dev
+  cloud:
+    config:
+      enabled: false
