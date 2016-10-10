@@ -14,7 +14,6 @@ import java.util.List;
 /**
  * Created by proshik on 21.08.16.
  */
-@Service
 @FeignClient("wordbook-service")
 public interface WordbookClient {
 

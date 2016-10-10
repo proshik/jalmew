@@ -18,9 +18,9 @@ security:
 
 #yandex dict
 yandex:
-    client:
-        dict:
-            root:
-                url: https://dictionary.yandex.net/api/v1/dicservice.json/lookup
-            key: dict.1.1.20160315T215735Z.efa2f0f9aa89f225.a1845d9073947ee2350a879d35deabc4caf1f99d
-            lang: en-ru
+  client:
+    dict:
+      root:
+        url: {YANDEX_DICT_URL}
+      key: {YANDEX_DICT_KEY}
+      lang: en-ru

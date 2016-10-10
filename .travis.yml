@@ -1,0 +1,11 @@
+sudo: false
+
+language: java
+jdk: oraclejdk8
+
+notifications:
+  email:
+    - proxoraleksandrovich@gmail.com
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

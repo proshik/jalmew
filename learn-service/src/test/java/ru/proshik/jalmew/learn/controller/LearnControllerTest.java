@@ -65,7 +65,7 @@ public class LearnControllerTest {
         when(wordbookClient.listForLearn("userName")).thenReturn(wordListOutFromWordbookService);
         when(wordClient.search(anySet())).thenReturn(wordOutShortFromWordServiceOut);
 
-        mockMvc.perform(get("/api/v1.0/learn/training/words").principal(getPrincipcal()))
+        mockMvc.perform(get("/api/v1.0/learn/training/words").principal(getPrincipal()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.words[*]", hasSize(10)))
                 .andExpect(jsonPath("$.words[0].saltWords[*]", hasSize(5)))
@@ -100,7 +100,7 @@ public class LearnControllerTest {
     public void wordTranslateLessWordsInWordbookUserTest() throws Exception {
         when(wordbookClient.listForLearn("userName")).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/v1.0/learn/training/words").principal(getPrincipcal()))
+        mockMvc.perform(get("/api/v1.0/learn/training/words").principal(getPrincipal()))
                 .andExpect(status().isNoContent());
     }
 
@@ -109,7 +109,7 @@ public class LearnControllerTest {
         initDataTrainingWordAnswer();
 
         mockMvc.perform(put("/api/v1.0/learn/training/words")
-                .principal(getPrincipcal())
+                .principal(getPrincipal())
                 .content(mapper.writeValueAsString(answerResultList))
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
@@ -166,7 +166,7 @@ public class LearnControllerTest {
 
     }
 
-    public Principal getPrincipcal() {
+    public Principal getPrincipal() {
         return () -> "userName";
     }
 }

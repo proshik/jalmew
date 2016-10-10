@@ -1,0 +1,8 @@
+eureka:
+  client:
+    enabled: false
+
+externalServers:
+  ribbon:
+    NIWSServerListClassName: com.netflix.loadbalancer.ConfigurationBasedServerList
+    listOfServers: server1:18201,server2:18201

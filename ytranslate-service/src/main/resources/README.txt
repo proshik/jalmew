@@ -37,3 +37,5 @@ spring:
 
 При этом можно еще для некоторых свойств грузить значения через тот же classpath'
 -Dyandex.client.dict.key=testKey
+
+3. -Dspring.cloud.config.enabled=false -Dspring.cloud.config.discovery.enabled=false
