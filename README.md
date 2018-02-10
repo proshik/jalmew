@@ -4,7 +4,9 @@
 [![codecov](https://codecov.io/gh/proshik/jalmew/branch/master/graph/badge.svg)](https://codecov.io/gh/proshik/jalmew)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f659447910364f0a8e929675a279c73a)](https://www.codacy.com/app/Krylov-ProxorOrganization/jalmew?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=proshik/jalmew&amp;utm_campaign=Badge_Grade)
 
+```
 **IN DEVELOP**
+```
 
 *Приложение для пополнения словарного запаса английских слов*
 
